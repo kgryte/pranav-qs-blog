@@ -41,11 +41,11 @@ LAPACK is vast, with approximately 1,700 routines, and implementing even 10% of 
 
 <table>
   <tr>
-    <td style="vertical-align: top; width: 25%;">
+    <td style="vertical-align: top; width: auto;">
       <!-- Image column -->
-      <img src="image-2.png" alt="alt text" style="width:auto;height:300px;">
+      <img src="image-2.png" alt="alt text" style="width:1100px;height:300px;">
     </td>
-    <td style="vertical-align: top; width: 75%;">
+    <td style="vertical-align: top; width: auto;">
       <!-- Text column -->
         <p>
             One day, I reviewed all the available LAPACK routines from netlib-lapack, categorizing them based on difficulty and dependencies. I compiled this information into a list, which can be found at lapack-tracker-issue. My original approach was to implement the routines in a depth-first manner for each package, which led to the creation of several dependency trees, prioritizing easier implementations. However, I was unaware of the pull request (PR) review process at the time, which ultimately hindered the feasibility of my depth-first strategy.
@@ -70,7 +70,7 @@ LAPACK is vast, with approximately 1,700 routines, and implementing even 10% of 
 
 <table>
   <tr>
-    <td style="vertical-align: top; width: 45%;">
+    <td style="vertical-align: top; width: auto;">
         <p>
             Fortran stores array elements in a column-major format, unlike C or JavaScript, which prefer row-major storage. Following the approach used in cblas, we decided to introduce a new parameter, order, in each implementation to specify the storage layout. Based on the value of order, there would be distinct implementations and optimizations for each layout.
         </p>
@@ -78,8 +78,8 @@ LAPACK is vast, with approximately 1,700 routines, and implementing even 10% of 
             The order we loop through multidimensional arrays can have a big impact on speed. Fortran is as said column-major, Meaning consecutive elements of a column are stored next to each other in memory, and we should loop through arrays in this order order of columns unlike conventional looping over rows.
         </p>
     </td>
-    <td style="vertical-align: top; width: 75%;">
-      <img src="image-3.png" alt="alt text" style="width:auto;height:300px;">
+    <td style="vertical-align: top; width: auto;">
+      <img src="image-3.png" alt="alt text" style="width:3200px;height:300px;">
     </td>
   </tr>
 </table>
@@ -93,11 +93,11 @@ LAPACK is vast, with approximately 1,700 routines, and implementing even 10% of 
 
 <table>
   <tr>
-    <td style="vertical-align: top; width: 45%;">
+    <td style="vertical-align: top; width: auto;">
       <!-- Image column -->
-      <img src="ndarray.jpg" alt="alt text" style="width:auto;height:300px;">
+      <img src="ndarray.jpg" alt="alt text" style="width:2800px;height:300px;">
     </td>
-    <td style="vertical-align: top; width: 75%;">
+    <td style="vertical-align: top; width: auto;">
       <!-- Text column -->
         <p>
             For packages that accept arrays as arguments, we developed a foundational, private version from which two distinct APIs are derived: one for the standard API and another for the ndarray API, both of which are available to end users.

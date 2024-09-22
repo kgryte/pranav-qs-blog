@@ -43,7 +43,7 @@ LAPACK is vast, with approximately 1,700 routines, and implementing even 10% of 
   <tr>
     <td style="vertical-align: top; width: auto;">
       <!-- Image column -->
-      <img src="image-2.png" alt="alt text" style="width:1100px;height:300px;">
+      <img src="image-2.png" alt="alt text" style="width:1200px;height:300px;">
     </td>
     <td style="vertical-align: top; width: auto;">
       <!-- Text column -->

@@ -1,15 +1,13 @@
 # Adding support for LAPACK routines in stdlib
 
-Considering the niche combination of LAPACK routines and JavaScript, and prompted by a tag from Athan regarding a QS internship, I have initiated my interview preparation and here is my final blog post.
-
-Hello, I am Pranav Goswami, a Computer Science graduate from IIT Jodhpur. I have been contributing to various open source organisations primarily LFortran and stdlib-js.
+Hello, I am Pranav Goswami, a Computer Science graduate from IIT Jodhpur. I have been contributing to various open source organisations primarily LFortran and stdlib.
 
 ### About project
 
-During the course of internship my goal was to add support for as many LAPACK routines to stdlib-js as possible.
+During the course of internship my goal was to add support for as many LAPACK routines to stdlib as possible.
 
 <!-- ![alt text](image02.jpg) -->
-<br>
+
 <img src="image02.jpg" alt="alt text" style="position:relative;left:10%;width:80%;height:400px;">
 
 <br>
@@ -22,12 +20,12 @@ Now, it might seem what's tricky in that, just take existing Fortran implementat
 
 ### Motivation
 
-Fortran has long been a foundational programming language for scientific computing, while JavaScript dominates the web ecosystem. I’ve observed various organizations attempting to compile Fortran codebases into WebAssembly (WASM) for browser execution. This is where I believe stdlib is simplifying the process by offering APIs that enable execution directly via Node.js in a web environment. Leveraging the JavaScript standard library for direct execution on the web offers significant performance advantages, primarily by eliminating the need for implicit data transfers between WebAssembly (WASM) and JavaScript. This approach also reduces the number of floating-point operations (FLOPs), and by keeping computations within JavaScript, higher performance is ensured. Additionally, these routines are beneficial for various IoT applications that lack WASM support, making JavaScript an optimal choice in such contexts. This approach intrigues me, which is why I chose to explore it further.
+Fortran has long been a foundational programming language for scientific computing, while JavaScript dominates the web ecosystem. I’ve observed various organizations attempting to compile Fortran codebases into WebAssembly (Wasm) for browser execution. This is where I believe stdlib is simplifying the process by offering APIs that enable execution directly via Node.js in a web environment. Leveraging the JavaScript standard library for direct execution on the web offers significant performance advantages, primarily by eliminating the need for implicit data transfers between WebAssembly (Wasm) and JavaScript. This approach also reduces the number of floating-point operations (FLOPs), and by keeping computations within JavaScript, higher performance is ensured. Additionally, these routines are beneficial for various IoT applications that lack Wasm support, making JavaScript an optimal choice in such contexts. This approach intrigues me, which is why I chose to explore it further.
 
 <!-- More reasons of why this projecT:
 1. Innvoation aspect: currently BLIS only supports BLAS
-2. There can be performance advantages incomparision to copying data to WASM and back to JS. If always can be in js, always better performance, as it is more native.
-3. IoT and all where WASM support is not there, this can be a good alternative.
+2. There can be performance advantages incomparision to copying data to Wasm and back to JS. If always can be in js, always better performance, as it is more native.
+3. IoT and all where Wasm support is not there, this can be a good alternative.
 4.  -->
 
 ## Walkthrough
@@ -48,16 +46,13 @@ LAPACK is vast, with approximately 1,700 routines, and implementing even 10% of 
     <td style="vertical-align: top; width: auto;">
       <!-- Text column -->
         <p>
-            One day, I reviewed all the available LAPACK routines from netlib-lapack, categorizing them based on difficulty and dependencies. I compiled this information into a list, which can be found at lapack-tracker-issue. My original approach was to implement the routines in a depth-first manner for each package, which led to the creation of several dependency trees, prioritizing easier implementations. However, I was unaware of the pull request (PR) review process at the time, which ultimately hindered the feasibility of my depth-first strategy.
+            One day, I reviewed all the available LAPACK routines from netlib-lapack, categorizing them based on difficulty and dependencies. I compiled this information into a list, which can be found at lapack-tracker-issue. My original approach was to implement the routines in a depth-first manner for each package, which led to the creation of several dependency trees, prioritizing easier implementations.
         </p>
         <p>
             I quickly realized that the depth-first approach would not be feasible, as we did not have the luxury of years to develop and integrate the packages. Instead, I had a strict timeline of just three months to get up to speed, minimize code errors, automate certain processes, and still maintain a steady and positive pace in implementing the packages.
         </p>
         <p>
-            After a discussion with Athan, we decided to focus on implementing packages that are leaves in the majority of the dependency trees—essentially laying the foundation for further development OR simply *pickup low hanging fruits* :) 
-        </p>
-        <p>
-            With the plan set, I opened my first LAPACK pull request (PR), which introduced a JavaScript implementation for dlaswp. The dlaswp routine performs a series of row interchanges on a matrix A using pivot indices stored in IPIV. This PR revealed several challenges that arose during the conversion of the original Fortran implementation to JavaScript. Let’s delve into these challenges:
+            After a discussion with Athan, we decided on a two-pronged strategy to avoid potential bottlenecks: (1) continue working in a depth-first approach to maintain progress while PRs are under review, and (2) focus on implementing packages that are leaf nodes in most dependency trees, thereby establishing a solid foundation for future development OR simply *pickup low hanging fruits* :)
         </p>
     </td>
   </tr>
@@ -72,7 +67,7 @@ LAPACK is vast, with approximately 1,700 routines, and implementing even 10% of 
   <tr>
     <td style="vertical-align: top; width: auto;">
         <p>
-            Fortran stores array elements in a column-major format, unlike C or JavaScript, which prefer row-major storage. Following the approach used in cblas, we decided to introduce a new parameter, order, in each implementation to specify the storage layout. Based on the value of order, there would be distinct implementations and optimizations for each layout.
+            Fortran stores array elements in a column-major format, unlike C or JavaScript, which prefer row-major storage. Following the approach used in LAPACKE, we decided to introduce a new parameter, order, in each implementation to specify the storage layout. Based on the value of order, there would be distinct implementations and optimizations for each layout.
         </p>
         <p>
             The order we loop through multidimensional arrays can have a big impact on speed. Fortran is as said column-major, Meaning consecutive elements of a column are stored next to each other in memory, and we should loop through arrays in this order order of columns unlike conventional looping over rows.
@@ -84,7 +79,43 @@ LAPACK is vast, with approximately 1,700 routines, and implementing even 10% of 
   </tr>
 </table>
 
+Let's illustrate this with an example. Consider a 2D array `A` of size `5x4`. To iterate over the array in row-major order, we would loop through the rows first, followed by the columns. In contrast, to iterate over the array in column-major order, we would loop through the columns first, followed by the rows. The code snippet below demonstrates this concept.
 
+```javascript
+var Float64Array = require( '@stdlib/array/float64' );
+var A; var B; var i; var j;
+
+/**
+* 5x4 matrix
+* [  1,  2,  3,  4 ],
+* [  5,  6,  7,  8 ],
+* [  9, 10, 11, 12 ],
+* [ 13, 14, 15, 16 ],
+* [ 17, 18, 19, 20 ]
+*/
+
+// row major
+A = new Float64Array( [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 ] );
+
+// column major
+B = new Float64Array( [ 1, 5, 9, 13, 17, 2, 6, 10, 14, 18, 3, 7, 11, 15, 19, 4, 8, 12, 16, 20 ] );
+
+// iterate over A in cache optimal order
+for ( i = 0; i < 5; i++ ) {
+	for ( j = 0; j < 4; j++ ) {
+		console.log( A[ ( i * 4 ) + j ] );
+	}
+}
+
+// iterate over B in cache optimal order
+for ( i = 0; i < 4; i++ ) {
+	for ( j = 0; j < 5; j++ ) {
+		console.log( B[ ( i * 5 ) + j ] );
+	}
+}
+```
+
+Thereby, we need to ensure that our implementations are optimized for both row-major and column-major orders. We employ various optimization techniques, such as loop tiling and cache optimization, to enhance performance. While some of these optimizations are already present in Fortran codes, simplifying the translation process, in most cases, we need to identify and implement these optimizations ourselves to achieve optimal performance.
 
 <!-- <br>
 <img src="image-3.png" alt="alt text" style="position:relative;left:35%;width:30%;height:300px;"> -->
@@ -153,7 +184,12 @@ Enough of these challenges! You may feel free to look at my open/merged PRs at [
 
 We leverage free-form Fortran code extensively to optimize the performance of various BLAS (Basic Linear Algebra Subprograms) and LAPACK (Linear Algebra Package) routines. In response, [Athan](https://www.linkedin.com/in/athanreines/) and I decided to document our methodology on [`How to Call Fortran Routines from JavaScript Using Node.js`](https://blog.stdlib.io/how-to-call-fortran-routines-from-javascript-with-node-js/).
 
+## Fortran and C implementation
+
+The initial focus on JavaScript implementations is part of a multi-phase approach. Implementing in JavaScript allows us to establish comprehensive documentation, testing, and benchmarking infrastructure. Once this foundation is in place, we can subsequently integrate C and Fortran implementations in a systematic manner. One of the other reasons for us not adding Fortran, specifically, was that we had not yet solved a build tooling issue to allow dynamic Fortran dependency resolution. Utilizing pure JavaScript fallbacks alongside robust testing and benchmarking infrastructure facilitated faster iterations in refining API design and implementation logic.
+
 ## Future plans & Conclusion
+
 
 After the internship, I'll try to continue adding packages and if not atleast review PRs that affect the codebase which I worked on. With these, I would like to thank Quansight and Athan Reines for providing me with this opportunity. I learnt a lot, this was a long dream to work as an intern at Quansight and I am happy I fulfiled it. Extending my thanks to Melissa, she is an amazing cordinator, very friendly, joyful, thank you for spending time for us! Thank you all!
 

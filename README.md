@@ -66,7 +66,7 @@ With the plan set, I opened my first LAPACK pull request (PR), which introduced 
 Fortran stores array elements in a `column-major` format, unlike C or JavaScript, which prefer `row-major` storage. Following the approach used in LAPACKE, we decided to introduce a new parameter, order, in each implementation to specify the storage layout. Based on the value of order, there would be distinct implementations and optimizations for each layout. The order we loop through multidimensional arrays can have a big impact on speed. Fortran is as said `column-major`, Meaning consecutive elements of a column are stored next to each other in memory, and we should loop through arrays in this order order of columns unlike conventional looping over rows.
 
 <br>
-<img src="image-3.png" alt="alt text" style="position:relative;left:15%;width:70%;height:500px;">
+<img src="image-3.png" alt="alt text" style="position:relative;left:15%;width:70%;height:50%;">
 
 <br>
 
@@ -132,7 +132,7 @@ Now, let's examine the plot below, which depicts the relationship between the ra
 > Rate vs Size plot: `row-major` vs `column-major` order 
 
 <br>
-<img src="rate-vs-size-row-vs-column.png" alt="alt text" style="position:relative;left:25%;width:50%;height:500px;">
+<img src="rate-vs-size-row-vs-column.png" alt="alt text" style="position:relative;left:25%;width:50%;height:50%;">
 
 <br>
 
@@ -141,7 +141,7 @@ Next stepl involves fixint the the iteration order first to `row-major` and then
 From Figure 2(b), it is evident that increasing the row size has a more pronounced impact on the copying rate after a certain threshold. This is due to the limited cache size, resulting in a lower rate for larger row sizes when compared to increasing the column size. On the other hand, Figure 2(a) shows no significant difference in the copying rate when increasing the row or column size in the `column-major` order. This is because `column-major` order experiences more frequent cache misses compared to `row-major` order, regardless of whether the size increase is in the rows or columns, leading to lower efficiency overall for both small and large sizes.
 
 <br>
-<img src="combined-increasing-size-row-col.png" alt="alt text" style="position:relative;left:25%;width:50%;height:500px;">
+<img src="combined-increasing-size-row-col.png" alt="alt text" style="position:relative;left:25%;width:50%;height:50%;">
 
 <br>
 
@@ -174,7 +174,7 @@ With the following diff, we can interchange the loops to optimize the `dlacpy` f
 ```
 
 <br>
-<img src="column-major-optimized.png" alt="alt text" style="position:relative;left:25%;width:50%;height:500px;">
+<img src="column-major-optimized.png" alt="alt text" style="position:relative;left:25%;width:50%;height:50%;">
 
 <br>
 

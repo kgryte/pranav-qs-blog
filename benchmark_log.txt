@@ -1,0 +1,175 @@
+TAP version 13
+# @stdlib/lapack/base/dlacpy:order=column-major,size=9
+  ---
+  iterations: 10000000
+  elapsed: 0.14727275
+  rate: 67901224.08931726
+  ...
+ok 1 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=9
+  ---
+  iterations: 10000000
+  elapsed: 0.145287583
+  rate: 68829006.53664257
+  ...
+ok 2 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=9
+  ---
+  iterations: 10000000
+  elapsed: 0.146291792
+  rate: 68356534.99958494
+  ...
+ok 3 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=100
+  ---
+  iterations: 1000000
+  elapsed: 0.120574708
+  rate: 8293613.284139158
+  ...
+ok 4 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=100
+  ---
+  iterations: 1000000
+  elapsed: 0.120716708
+  rate: 8283857.442500833
+  ...
+ok 5 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=100
+  ---
+  iterations: 1000000
+  elapsed: 0.120672417
+  rate: 8286897.908077867
+  ...
+ok 6 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=961
+  ---
+  iterations: 100000
+  elapsed: 0.103539375
+  rate: 965816.1448241309
+  ...
+ok 7 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=961
+  ---
+  iterations: 100000
+  elapsed: 0.103596167
+  rate: 965286.6789946002
+  ...
+ok 8 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=961
+  ---
+  iterations: 100000
+  elapsed: 0.103636542
+  rate: 964910.6200397925
+  ...
+ok 9 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=10000
+  ---
+  iterations: 10000
+  elapsed: 0.105663
+  rate: 94640.5080302471
+  ...
+ok 10 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=10000
+  ---
+  iterations: 10000
+  elapsed: 0.105587667
+  rate: 94708.03062634199
+  ...
+ok 11 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=10000
+  ---
+  iterations: 10000
+  elapsed: 0.105475916
+  rate: 94808.37312661973
+  ...
+ok 12 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=99856
+  ---
+  iterations: 1000
+  elapsed: 0.106708125
+  rate: 9371.357616863757
+  ...
+ok 13 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=99856
+  ---
+  iterations: 1000
+  elapsed: 0.106509208
+  rate: 9388.859599819765
+  ...
+ok 14 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=99856
+  ---
+  iterations: 1000
+  elapsed: 0.106488208
+  rate: 9390.7111292548
+  ...
+ok 15 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=1000000
+  ---
+  iterations: 100
+  elapsed: 0.119651042
+  rate: 835.7637203025779
+  ...
+ok 16 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=1000000
+  ---
+  iterations: 100
+  elapsed: 0.112054375
+  rate: 892.4238790319432
+  ...
+ok 17 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=1000000
+  ---
+  iterations: 100
+  elapsed: 0.112110708
+  rate: 891.9754569741901
+  ...
+ok 18 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=9998244
+  ---
+  iterations: 10
+  elapsed: 0.572295791
+  rate: 17.473481645787604
+  ...
+ok 19 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=9998244
+  ---
+  iterations: 10
+  elapsed: 0.556163083
+  rate: 17.980337612591953
+  ...
+ok 20 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=9998244
+  ---
+  iterations: 10
+  elapsed: 0.556146333
+  rate: 17.980879143906897
+  ...
+ok 21 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=100000000
+  ---
+  iterations: 10
+  elapsed: 4.467566208
+  rate: 2.2383551881319987
+  ...
+ok 22 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=100000000
+  ---
+  iterations: 10
+  elapsed: 4.407217917
+  rate: 2.2690051157731306
+  ...
+ok 23 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,size=100000000
+  ---
+  iterations: 10
+  elapsed: 4.368509791
+  rate: 2.2891101264330436
+  ...
+ok 24 benchmark finished
+#
+1..24
+# total 24
+# pass  24
+#
+# ok

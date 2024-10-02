@@ -1,0 +1,889 @@
+TAP version 13
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[10,10],size=100
+  ---
+  iterations: 1000000
+  elapsed: 0.116537375
+  rate: 8580938.089604301
+  ...
+ok 1 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[10,10],size=100
+  ---
+  iterations: 1000000
+  elapsed: 0.114274083
+  rate: 8750890.610953316
+  ...
+ok 2 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[10,10],size=100
+  ---
+  iterations: 1000000
+  elapsed: 0.115757125
+  rate: 8638777.094714472
+  ...
+ok 3 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[31,31],size=961
+  ---
+  iterations: 100000
+  elapsed: 0.090285542
+  rate: 1107597.0502563966
+  ...
+ok 4 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[31,31],size=961
+  ---
+  iterations: 100000
+  elapsed: 0.09044225
+  rate: 1105677.9326034016
+  ...
+ok 5 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[31,31],size=961
+  ---
+  iterations: 100000
+  elapsed: 0.092880584
+  rate: 1076651.2837602312
+  ...
+ok 6 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[100,100],size=10000
+  ---
+  iterations: 100000
+  elapsed: 0.924532208
+  rate: 108162.8083204647
+  ...
+ok 7 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[100,100],size=10000
+  ---
+  iterations: 100000
+  elapsed: 0.907790625
+  rate: 110157.55973465799
+  ...
+ok 8 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[100,100],size=10000
+  ---
+  iterations: 100000
+  elapsed: 0.9039085
+  rate: 110630.6667101814
+  ...
+ok 9 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[316,316],size=99856
+  ---
+  iterations: 10000
+  elapsed: 0.915449583
+  rate: 10923.594467353643
+  ...
+ok 10 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[316,316],size=99856
+  ---
+  iterations: 10000
+  elapsed: 1.106604042
+  rate: 9036.655949608396
+  ...
+ok 11 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[316,316],size=99856
+  ---
+  iterations: 10000
+  elapsed: 0.910496708
+  rate: 10983.01609674793
+  ...
+ok 12 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[1000,1000],size=1000000
+  ---
+  iterations: 1000
+  elapsed: 0.932457583
+  rate: 1072.4348412532563
+  ...
+ok 13 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[1000,1000],size=1000000
+  ---
+  iterations: 1000
+  elapsed: 0.901547417
+  rate: 1109.2039987509609
+  ...
+ok 14 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[1000,1000],size=1000000
+  ---
+  iterations: 1000
+  elapsed: 0.896982125
+  rate: 1114.8494179858935
+  ...
+ok 15 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[3162,3162],size=9998244
+  ---
+  iterations: 100
+  elapsed: 1.411660458
+  rate: 70.83856421230153
+  ...
+ok 16 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[3162,3162],size=9998244
+  ---
+  iterations: 100
+  elapsed: 0.956566416
+  rate: 104.54057170244621
+  ...
+ok 17 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[3162,3162],size=9998244
+  ---
+  iterations: 100
+  elapsed: 0.914818375
+  rate: 109.31131548379754
+  ...
+ok 18 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[10000,10000],size=100000000
+  ---
+  iterations: 10
+  elapsed: 6.349980917
+  rate: 1.5748078822139868
+  ...
+ok 19 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[10000,10000],size=100000000
+  ---
+  iterations: 10
+  elapsed: 0.964799
+  rate: 10.36485319740174
+  ...
+ok 20 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[10000,10000],size=100000000
+  ---
+  iterations: 10
+  elapsed: 0.9348725
+  rate: 10.696645799293487
+  ...
+ok 21 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[20,5],size=100
+  ---
+  iterations: 1000000
+  elapsed: 0.12614625
+  rate: 7927306.598491831
+  ...
+ok 22 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[20,5],size=100
+  ---
+  iterations: 1000000
+  elapsed: 0.126196166
+  rate: 7924171.008491653
+  ...
+ok 23 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[20,5],size=100
+  ---
+  iterations: 1000000
+  elapsed: 0.126540334
+  rate: 7902618.622770507
+  ...
+ok 24 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[200,5],size=1000
+  ---
+  iterations: 100000
+  elapsed: 0.118416792
+  rate: 844474.8275227722
+  ...
+ok 25 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[200,5],size=1000
+  ---
+  iterations: 100000
+  elapsed: 0.118477625
+  rate: 844041.2271937423
+  ...
+ok 26 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[200,5],size=1000
+  ---
+  iterations: 100000
+  elapsed: 0.118564042
+  rate: 843426.0363694417
+  ...
+ok 27 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[2000,5],size=10000
+  ---
+  iterations: 10000
+  elapsed: 0.119592667
+  rate: 83617.16692880509
+  ...
+ok 28 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[2000,5],size=10000
+  ---
+  iterations: 10000
+  elapsed: 0.118707666
+  rate: 84240.55780862544
+  ...
+ok 29 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[2000,5],size=10000
+  ---
+  iterations: 10000
+  elapsed: 0.121656542
+  rate: 82198.6210984034
+  ...
+ok 30 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[20000,5],size=100000
+  ---
+  iterations: 1000
+  elapsed: 0.123472125
+  rate: 8098.994003707315
+  ...
+ok 31 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[20000,5],size=100000
+  ---
+  iterations: 1000
+  elapsed: 0.121681959
+  rate: 8218.145140151795
+  ...
+ok 32 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[20000,5],size=100000
+  ---
+  iterations: 1000
+  elapsed: 0.11779425
+  rate: 8489.378726041381
+  ...
+ok 33 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[200000,5],size=1000000
+  ---
+  iterations: 100
+  elapsed: 0.161178167
+  rate: 620.4314260504029
+  ...
+ok 34 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[200000,5],size=1000000
+  ---
+  iterations: 100
+  elapsed: 0.126117834
+  rate: 792.9092724507145
+  ...
+ok 35 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[200000,5],size=1000000
+  ---
+  iterations: 100
+  elapsed: 0.121113125
+  rate: 825.6743437179083
+  ...
+ok 36 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[2000000,5],size=10000000
+  ---
+  iterations: 10
+  elapsed: 0.708978959
+  rate: 14.10479094345027
+  ...
+ok 37 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[2000000,5],size=10000000
+  ---
+  iterations: 10
+  elapsed: 0.125197541
+  rate: 79.87377323968369
+  ...
+ok 38 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[2000000,5],size=10000000
+  ---
+  iterations: 10
+  elapsed: 0.123533208
+  rate: 80.94989324651878
+  ...
+ok 39 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[20000000,5],size=100000000
+  ---
+  iterations: 10
+  elapsed: 8.03915025
+  rate: 1.2439125640175712
+  ...
+ok 40 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[20000000,5],size=100000000
+  ---
+  iterations: 10
+  elapsed: 1.251909208
+  rate: 7.987799703123519
+  ...
+ok 41 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[20000000,5],size=100000000
+  ---
+  iterations: 10
+  elapsed: 1.206887375
+  rate: 8.28577728721373
+  ...
+ok 42 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[5,20],size=100
+  ---
+  iterations: 1000000
+  elapsed: 0.101883917
+  rate: 9815091.816699587
+  ...
+ok 43 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[5,20],size=100
+  ---
+  iterations: 1000000
+  elapsed: 0.101508125
+  rate: 9851428.149224507
+  ...
+ok 44 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[5,20],size=100
+  ---
+  iterations: 1000000
+  elapsed: 0.100446208
+  rate: 9955577.417118624
+  ...
+ok 45 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[5,200],size=1000
+  ---
+  iterations: 1000000
+  elapsed: 0.941718917
+  rate: 1061887.9815918575
+  ...
+ok 46 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[5,200],size=1000
+  ---
+  iterations: 1000000
+  elapsed: 0.965023
+  rate: 1036244.7319908438
+  ...
+ok 47 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[5,200],size=1000
+  ---
+  iterations: 1000000
+  elapsed: 0.941518916
+  rate: 1062113.5518428606
+  ...
+ok 48 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[5,2000],size=10000
+  ---
+  iterations: 100000
+  elapsed: 0.8942515
+  rate: 111825.36456466666
+  ...
+ok 49 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[5,2000],size=10000
+  ---
+  iterations: 100000
+  elapsed: 0.888439917
+  rate: 112556.85172011469
+  ...
+ok 50 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[5,2000],size=10000
+  ---
+  iterations: 100000
+  elapsed: 0.888356375
+  rate: 112567.43668890765
+  ...
+ok 51 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[5,20000],size=100000
+  ---
+  iterations: 10000
+  elapsed: 0.891988708
+  rate: 11210.904252837247
+  ...
+ok 52 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[5,20000],size=100000
+  ---
+  iterations: 10000
+  elapsed: 0.887170375
+  rate: 11271.792072633174
+  ...
+ok 53 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[5,20000],size=100000
+  ---
+  iterations: 10000
+  elapsed: 0.883563458
+  rate: 11317.80621918839
+  ...
+ok 54 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[5,200000],size=1000000
+  ---
+  iterations: 1000
+  elapsed: 0.951560625
+  rate: 1050.905190617781
+  ...
+ok 55 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[5,200000],size=1000000
+  ---
+  iterations: 1000
+  elapsed: 0.884109541
+  rate: 1131.0815613062136
+  ...
+ok 56 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[5,200000],size=1000000
+  ---
+  iterations: 1000
+  elapsed: 0.88415625
+  rate: 1131.021807514226
+  ...
+ok 57 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[5,2000000],size=10000000
+  ---
+  iterations: 100
+  elapsed: 1.370992875
+  rate: 72.9398393117105
+  ...
+ok 58 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[5,2000000],size=10000000
+  ---
+  iterations: 100
+  elapsed: 0.899667125
+  rate: 111.15222199544081
+  ...
+ok 59 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[5,2000000],size=10000000
+  ---
+  iterations: 100
+  elapsed: 0.907581291
+  rate: 110.18296762135438
+  ...
+ok 60 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[5,20000000],size=100000000
+  ---
+  iterations: 10
+  elapsed: 7.593771792
+  rate: 1.3168686489281847
+  ...
+ok 61 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[5,20000000],size=100000000
+  ---
+  iterations: 10
+  elapsed: 1.006437875
+  rate: 9.936033061156408
+  ...
+ok 62 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=row-major,shape=[5,20000000],size=100000000
+  ---
+  iterations: 10
+  elapsed: 0.926891292
+  rate: 10.788751697539952
+  ...
+ok 63 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[10,10],size=100
+  ---
+  iterations: 1000000
+  elapsed: 0.112283916
+  rate: 8905995.049192976
+  ...
+ok 64 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[10,10],size=100
+  ---
+  iterations: 1000000
+  elapsed: 0.112218
+  rate: 8911226.362972073
+  ...
+ok 65 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[10,10],size=100
+  ---
+  iterations: 1000000
+  elapsed: 0.112233208
+  rate: 8910018.860015122
+  ...
+ok 66 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[31,31],size=961
+  ---
+  iterations: 1000000
+  elapsed: 1.09455125
+  rate: 913616.4249960885
+  ...
+ok 67 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[31,31],size=961
+  ---
+  iterations: 1000000
+  elapsed: 0.903841417
+  rate: 1106388.7770480427
+  ...
+ok 68 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[31,31],size=961
+  ---
+  iterations: 1000000
+  elapsed: 0.902139167
+  rate: 1108476.426453614
+  ...
+ok 69 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[100,100],size=10000
+  ---
+  iterations: 100000
+  elapsed: 0.900253
+  rate: 111079.88532112639
+  ...
+ok 70 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[100,100],size=10000
+  ---
+  iterations: 100000
+  elapsed: 0.899520625
+  rate: 111170.32474936303
+  ...
+ok 71 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[100,100],size=10000
+  ---
+  iterations: 100000
+  elapsed: 0.899419666
+  rate: 111182.80351232614
+  ...
+ok 72 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[316,316],size=99856
+  ---
+  iterations: 10000
+  elapsed: 0.911312333
+  rate: 10973.1862917738
+  ...
+ok 73 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[316,316],size=99856
+  ---
+  iterations: 10000
+  elapsed: 0.906777583
+  rate: 11028.062655580668
+  ...
+ok 74 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[316,316],size=99856
+  ---
+  iterations: 10000
+  elapsed: 0.907032125
+  rate: 11024.96783121105
+  ...
+ok 75 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[1000,1000],size=1000000
+  ---
+  iterations: 1000
+  elapsed: 1.010965
+  rate: 989.1539271883795
+  ...
+ok 76 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[1000,1000],size=1000000
+  ---
+  iterations: 1000
+  elapsed: 0.97314575
+  rate: 1027.5953011149666
+  ...
+ok 77 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[1000,1000],size=1000000
+  ---
+  iterations: 1000
+  elapsed: 0.973417625
+  rate: 1027.3082943202307
+  ...
+ok 78 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[3162,3162],size=9998244
+  ---
+  iterations: 10
+  elapsed: 0.87524575
+  rate: 11.425362533894052
+  ...
+ok 79 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[3162,3162],size=9998244
+  ---
+  iterations: 10
+  elapsed: 0.515261041
+  rate: 19.40763846727546
+  ...
+ok 80 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[3162,3162],size=9998244
+  ---
+  iterations: 10
+  elapsed: 0.517045791
+  rate: 19.340646755211665
+  ...
+ok 81 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[10000,10000],size=100000000
+  ---
+  iterations: 10
+  elapsed: 9.789687375
+  rate: 1.0214830787688969
+  ...
+ok 82 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[10000,10000],size=100000000
+  ---
+  iterations: 10
+  elapsed: 4.70254475
+  rate: 2.126508206009097
+  ...
+ok 83 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[10000,10000],size=100000000
+  ---
+  iterations: 10
+  elapsed: 4.707597667
+  rate: 2.1242257107270337
+  ...
+ok 84 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[20,5],size=100
+  ---
+  iterations: 1000000
+  elapsed: 0.128543792
+  rate: 7779449.979194639
+  ...
+ok 85 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[20,5],size=100
+  ---
+  iterations: 1000000
+  elapsed: 0.131598
+  rate: 7598899.679326434
+  ...
+ok 86 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[20,5],size=100
+  ---
+  iterations: 1000000
+  elapsed: 0.127881625
+  rate: 7819731.72455386
+  ...
+ok 87 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[200,5],size=1000
+  ---
+  iterations: 100000
+  elapsed: 0.119186083
+  rate: 839024.1333797337
+  ...
+ok 88 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[200,5],size=1000
+  ---
+  iterations: 100000
+  elapsed: 0.121970083
+  rate: 819873.1815243579
+  ...
+ok 89 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[200,5],size=1000
+  ---
+  iterations: 100000
+  elapsed: 0.119498875
+  rate: 836827.9617695145
+  ...
+ok 90 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[2000,5],size=10000
+  ---
+  iterations: 10000
+  elapsed: 0.120625125
+  rate: 82901.46849588757
+  ...
+ok 91 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[2000,5],size=10000
+  ---
+  iterations: 10000
+  elapsed: 0.123001334
+  rate: 81299.9312674121
+  ...
+ok 92 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[2000,5],size=10000
+  ---
+  iterations: 10000
+  elapsed: 0.119921458
+  rate: 83387.91211160892
+  ...
+ok 93 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[20000,5],size=100000
+  ---
+  iterations: 1000
+  elapsed: 0.124416125
+  rate: 8037.543365058186
+  ...
+ok 94 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[20000,5],size=100000
+  ---
+  iterations: 1000
+  elapsed: 0.117965542
+  rate: 8477.05171396576
+  ...
+ok 95 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[20000,5],size=100000
+  ---
+  iterations: 1000
+  elapsed: 0.117860041
+  rate: 8484.639844983594
+  ...
+ok 96 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[200000,5],size=1000000
+  ---
+  iterations: 100
+  elapsed: 0.165825334
+  rate: 603.0441645303727
+  ...
+ok 97 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[200000,5],size=1000000
+  ---
+  iterations: 100
+  elapsed: 0.118744833
+  rate: 842.1419060819261
+  ...
+ok 98 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[200000,5],size=1000000
+  ---
+  iterations: 100
+  elapsed: 0.118749625
+  rate: 842.1079224460709
+  ...
+ok 99 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[2000000,5],size=10000000
+  ---
+  iterations: 10
+  elapsed: 0.850092167
+  rate: 11.763430352840787
+  ...
+ok 100 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[2000000,5],size=10000000
+  ---
+  iterations: 10
+  elapsed: 0.119023125
+  rate: 84.01728655670905
+  ...
+ok 101 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[2000000,5],size=10000000
+  ---
+  iterations: 10
+  elapsed: 0.119117084
+  rate: 83.95101411313931
+  ...
+ok 102 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[20000000,5],size=100000000
+  ---
+  iterations: 10
+  elapsed: 6.958011333
+  rate: 1.4371922552889007
+  ...
+ok 103 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[20000000,5],size=100000000
+  ---
+  iterations: 10
+  elapsed: 1.315359875
+  rate: 7.602482172416884
+  ...
+ok 104 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[20000000,5],size=100000000
+  ---
+  iterations: 10
+  elapsed: 1.234688333
+  rate: 8.099209924258675
+  ...
+ok 105 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[5,20],size=100
+  ---
+  iterations: 10000000
+  elapsed: 0.999551458
+  rate: 10004487.432802083
+  ...
+ok 106 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[5,20],size=100
+  ---
+  iterations: 10000000
+  elapsed: 1.018003417
+  rate: 9823149.738995424
+  ...
+ok 107 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[5,20],size=100
+  ---
+  iterations: 10000000
+  elapsed: 0.996080834
+  rate: 10039345.862968385
+  ...
+ok 108 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[5,200],size=1000
+  ---
+  iterations: 1000000
+  elapsed: 0.929543334
+  rate: 1075797.0752119878
+  ...
+ok 109 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[5,200],size=1000
+  ---
+  iterations: 1000000
+  elapsed: 0.930841334
+  rate: 1074296.9435003623
+  ...
+ok 110 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[5,200],size=1000
+  ---
+  iterations: 1000000
+  elapsed: 0.932283125
+  rate: 1072635.5258226946
+  ...
+ok 111 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[5,2000],size=10000
+  ---
+  iterations: 100000
+  elapsed: 0.927953125
+  rate: 107764.06405226556
+  ...
+ok 112 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[5,2000],size=10000
+  ---
+  iterations: 100000
+  elapsed: 0.932083292
+  rate: 107286.54923684653
+  ...
+ok 113 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[5,2000],size=10000
+  ---
+  iterations: 100000
+  elapsed: 0.918866458
+  rate: 108829.74248255779
+  ...
+ok 114 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[5,20000],size=100000
+  ---
+  iterations: 10000
+  elapsed: 0.964960916
+  rate: 10363.114022744523
+  ...
+ok 115 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[5,20000],size=100000
+  ---
+  iterations: 10000
+  elapsed: 0.906954583
+  rate: 11025.910434150152
+  ...
+ok 116 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[5,20000],size=100000
+  ---
+  iterations: 10000
+  elapsed: 0.885684958
+  rate: 11290.696437457165
+  ...
+ok 117 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[5,200000],size=1000000
+  ---
+  iterations: 1000
+  elapsed: 1.0020465
+  rate: 997.9576796086808
+  ...
+ok 118 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[5,200000],size=1000000
+  ---
+  iterations: 1000
+  elapsed: 0.962309208
+  rate: 1039.1670283175758
+  ...
+ok 119 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[5,200000],size=1000000
+  ---
+  iterations: 1000
+  elapsed: 0.955905708
+  rate: 1046.1282861175257
+  ...
+ok 120 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[5,2000000],size=10000000
+  ---
+  iterations: 10
+  elapsed: 0.828375125
+  rate: 12.071825551256142
+  ...
+ok 121 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[5,2000000],size=10000000
+  ---
+  iterations: 10
+  elapsed: 0.168957583
+  rate: 59.18645273234052
+  ...
+ok 122 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[5,2000000],size=10000000
+  ---
+  iterations: 10
+  elapsed: 0.167423458
+  rate: 59.72878663156032
+  ...
+ok 123 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[5,20000000],size=100000000
+  ---
+  iterations: 10
+  elapsed: 8.188149917
+  rate: 1.2212771018320376
+  ...
+ok 124 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[5,20000000],size=100000000
+  ---
+  iterations: 10
+  elapsed: 1.6156586659999999
+  rate: 6.189426151971633
+  ...
+ok 125 benchmark finished
+# @stdlib/lapack/base/dlacpy:order=column-major,shape=[5,20000000],size=100000000
+  ---
+  iterations: 10
+  elapsed: 1.609042917
+  rate: 6.214874627859289
+  ...
+ok 126 benchmark finished
+#
+1..126
+# total 126
+# pass  126
+#
+# ok

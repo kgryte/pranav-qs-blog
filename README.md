@@ -1,6 +1,12 @@
 # Adding support for LAPACK routines in stdlib
 
-Hello, I am [Pranav Goswami](https://github.com/pranavchiku), a Computer Science graduate from IIT Jodhpur. I have been contributing to various open source organisations primarily [LFortran](https://github.com/lfortran/lfortran) and [stdlib](https://github.com/stdlib-js/stdlib).
+**TODO:** motivate numerical/scientific computation on web. See first paragraph of https://labs.quansight.org/blog/numpy-quaddtype-blog for an example.
+
+Hello, I am [Pranav Goswami](https://github.com/pranavchiku), and, for the past three months, I've been **TODO**.
+
+<!--
+
+**TODO**: consider removing. The stick figure doesn't really add anything. Using ChatGPT for translating Fortran to JS is just a recipe for needless bugs and wasted time and should not even be suggested.
 
 ### About project
 
@@ -10,7 +16,11 @@ During the course of internship my goal was to add support for as many LAPACK ro
 
 Now, it might seem what's tricky in that, just take existing Fortran implementation, translate it to javascript ( shh, via chatGPT? ), follow stdlib conventions, do benchmarking, add tests, documentation, etc and you are done. Sounds simple, but there is a catch or I say there are multiple catches, please read through the blog to get a detailed walkthrough.
 
+-->
+
 ### Motivation
+
+**TODO**: this is not a strong motivation and was also not the primary aim of this project. Higher performance is not ensured. We did not set out to write routines solely in JS. It just happened to play out that way.
 
 Fortran has long been a foundational programming language for scientific computing, while JavaScript dominates the web ecosystem. I’ve observed various organizations attempting to compile Fortran codebases into WebAssembly (Wasm) for browser execution. This is where I believe stdlib is simplifying the process by offering APIs that enable execution directly via Node.js in a web environment. Leveraging the JavaScript standard library for direct execution on the web offers significant performance advantages, primarily by eliminating the need for implicit data transfers between WebAssembly (Wasm) and JavaScript. This approach also reduces the number of floating-point operations (FLOPs), and by keeping computations within JavaScript, higher performance is ensured. Additionally, these routines are beneficial for various IoT applications that lack Wasm support, making JavaScript an optimal choice in such contexts. This approach intrigues me, which is why I chose to explore it further.
 

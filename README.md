@@ -45,60 +45,21 @@ Fortran stores array elements in a `column-major` format, unlike C or JavaScript
 Let's illustrate this with an example. Consider a 2D array A of arbitrary size. We have implemented a function that copies the entire contents of matrix A into another matrix B. In `row-major` order iteration, we traverse the array by iterating over each row first, and within each row, we loop through the columns. On the other hand, in `column-major` order iteration, we loop through each column first, followed by the rows within that column. The code snippet below presents a cache-efficient implementation of the `dlacpy` function specifically optimized for `row-major` order traversal.
 
 ```javascript
-/**
- * Copies all of a matrix `A` to another matrix `B`.
- *
- * @private
- * @param {NonNegativeInteger} M - number of rows in matrix `A`
- * @param {NonNegativeInteger} N - number of columns in matrix `A`
- * @param {Float64Array} A - input matrix
- * @param {integer} strideA1 - stride of the first dimension of `A`
- * @param {integer} strideA2 - stride of the second dimension of `A`
- * @param {NonNegativeInteger} offsetA - starting index for `A`
- * @param {Float64Array} B - output matrix
- * @param {integer} strideB1 - stride of the first dimension of `B`
- * @param {integer} strideB2 - stride of the second dimension of `B`
- * @param {NonNegativeInteger} offsetB - starting index for `B`
- * @returns {Float64Array} `B`
- */
-function dlacpy(
-  M,
-  N,
-  A,
-  strideA1,
-  strideA2,
-  offsetA,
-  B,
-  strideB1,
-  strideB2,
-  offsetB,
-) {
-  // eslint-disable-line max-len
-  let da0;
-  let da1;
-  let db0;
-  let db1;
-  let S0;
-  let S1;
-  let ia;
-  let ib;
-  let i0;
-  let i1;
-
-  S0 = N;
-  S1 = M;
-  da0 = strideA2;
-  da1 = strideA1 - S0 * strideA2;
-  db0 = strideB2;
-  db1 = strideB1 - S0 * strideB2;
+function dlacpy( M, N, A, strideA1, strideA2, offsetA, B, strideB1, strideB2, offsetB ) {
+  let S0 = N;
+  let S1 = M;
+  let da0 = strideA2;
+  let da1 = strideA1 - S0 * strideA2;
+  let db0 = strideB2;
+  let db1 = strideB1 - S0 * strideB2;
 
   // Set the pointers to the first indexed elements in the respective matrices...
-  ia = offsetA;
-  ib = offsetB;
+  let ia = offsetA;
+  let ib = offsetB;
 
   // Iterate over the matrix dimensions...
-  for (i1 = 0; i1 < S1; i1++) {
-    for (i0 = 0; i0 < S0; i0++) {
+  for (let i1 = 0; i1 < S1; i1++) {
+    for (let i0 = 0; i0 < S0; i0++) {
       B[ib] = A[ia];
       ia += da0;
       ib += db0;

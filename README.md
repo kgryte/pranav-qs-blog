@@ -6,6 +6,25 @@ Hi! I am [Pranav Goswami](https://github.com/pranavchiku), and, over the past su
 
 Sound interesting? Let's go!
 
+
+
+### TODO: What is stdlib?
+
+TODO: provide an overview of stdlib, as many QS readers may not be familiar with the project.
+
+TODO: discuss some of the unique characteristics of the project: decomposable, isolated packages. Why separate packages? Independent installation, small bundle sizes, etc.
+
+TODO: consider showing code sample demonstrating independent installation and usage vs as part of total project.
+
+
+
+### TODO: What about WebAssembly?
+
+TODO: why not just compile everything to Wasm and call it a day? Display performance graph. Show code sample demonstrating difference in API design and usage (i.e., not as ergonomic). Manual memory management. Dynamically linking wasm modules requires threading exports and imports. Standalone binaries can end up with duplicated code. Plain JavaScript can result in smaller bundle sizes, especially when factoring in necessary additional wasm glue code.
+
+
+
+
 ### Motivation
 
 **TODO**: this is not a strong motivation and was also not the primary aim of this project. Higher performance is not ensured. We did not set out to write routines solely in JS. It just happened to play out that way.

@@ -1,22 +1,10 @@
-# Adding support for LAPACK routines in stdlib
+# LAPACK in your web browser: high-performance linear algebra with stdlib
 
-**TODO:** motivate numerical/scientific computation on web. See first paragraph of https://labs.quansight.org/blog/numpy-quaddtype-blog for an example.
+Web applications are rapidly emerging as a new frontier for high-performance scientific computation and AI-enabled end-user experiences. Underpinning the ML/AI revolution is linear algebra, a branch of mathematics concerning linear equations and their representations in vectors spaces and via matrices. LAPACK ("**L**inear **A**lgebra **Pack**age") is a fundamental software library for numerical linear algebra, providing robust, battle-tested implementations of common matrix operations. Despite LAPACK being a foundational component of most numerical computing programming languages and libraries, a comprehensive, high-quality LAPACK implementation tailored to the unique constraints of the web has yet to materialize. That is...until now.
 
-Hello, I am [Pranav Goswami](https://github.com/pranavchiku), and, for the past three months, I've been **TODO**.
+Hi! I am [Pranav Goswami](https://github.com/pranavchiku), and, over the past summer, I worked with [Athan Reines](https://github.com/kgryte) to add initial LAPACK support to [stdlib](https://github.com/stdlib-js/stdlib), a fundamental library for scientific computation written in C and JavaScript and optimized for use in web browsers and other web-native environments, such as Node.js and Deno. In this blog post, I'll discuss my journey, some expected and unexpected (!) challenges, and the road ahead. With a little bit of luck, my hope is that this work provides a critical building block in making web browsers a first-class environment for numerical computation and machine learning and portends a future of more powerful AI-enabled web applications.
 
-<!--
-
-**TODO**: consider removing. The stick figure doesn't really add anything. Using ChatGPT for translating Fortran to JS is just a recipe for needless bugs and wasted time and should not even be suggested.
-
-### About project
-
-During the course of internship my goal was to add support for as many LAPACK routines to stdlib as possible.
-
-<img src="/posts/implement-lapack-routines-in-stdlib/image02.jpg" alt="A stickman carrying packages refered as LAPACK packages written in Fortran to packages on left which are LAPACK JS packages" style={{position: 'relative', left: '10%', width: '80%',height: '400px'}} />
-
-Now, it might seem what's tricky in that, just take existing Fortran implementation, translate it to javascript ( shh, via chatGPT? ), follow stdlib conventions, do benchmarking, add tests, documentation, etc and you are done. Sounds simple, but there is a catch or I say there are multiple catches, please read through the blog to get a detailed walkthrough.
-
--->
+Sound interesting? Let's go!
 
 ### Motivation
 

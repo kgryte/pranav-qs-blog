@@ -44,8 +44,8 @@ and then perform the various operations
 
 ```javascript
 // Individually import desired functionality:
-import FancyArray from '@stdlib/ndarray/fancy';
-import daxpy from '@stdlib/blas/daxpy';
+import FancyArray from '@stdlib/ndarray-fancy';
+import daxpy from '@stdlib/blas-daxpy';
 
 // Define ndarray meta data:
 const shape = [4, 4, 4];

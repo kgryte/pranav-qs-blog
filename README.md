@@ -295,7 +295,7 @@ Briefly,
 - **package.json**: package meta data, including the enumeration of external package dependencies and a path to a plain JavaScript implementation for use in browser-based web applications.
 - **README.md**: primary documentation which includes API signatures and examples for both JavaScript and C interfaces.
 
-Given stdlib's demanding documentation and testing requirements, adding support for each routine is a decent amount of work, but the end result is robust, high-quality code suitable for serving as the foundation for scientific computation on the modern web. But enough with the preliminaries! Let's get down to business!
+Given stdlib's demanding documentation and testing requirements, adding support for each routine is a decent amount of work, but the end result is robust, high-quality, and, most importantly, modular code suitable for serving as the foundation for scientific computation on the modern web. But enough with the preliminaries! Let's get down to business!
 
 ## A multi-phase approach
 

@@ -215,7 +215,14 @@ daxpy(N, xdata, strideX, ydata, strideY);
 
 At least in this case, not only is the WebAssembly approach less ergonomic, but, as might be expected given the required data movement, there's a negative performance impact, as well.
 
-<img src="./daxpy_wasm_comparison_benchmarks_small.png" alt="Grouped column chart displaying a performance comparison of stdlib's C, JavaScript, and WebAssembly (Wasm) implementations for the BLAS routine daxpy for increasing array lengths." style={{position: 'relative', left: '15%', width: '70%', height: '50%'}} />
+![Grouped column chart displaying a performance comparison of stdlib's C, JavaScript, and WebAssembly (Wasm) implementations for the BLAS routine daxpy for increasing array lengths.](./daxpy_wasm_comparison_benchmarks_small.png)
+
+<figure style="text-align:center">
+	<img src="/posts/implement-lapack-routines-in-stdlib/daxpy_wasm_comparison_benchmarks_small.png" alt="Grouped column chart displaying a performance comparison of stdlib's C, JavaScript, and WebAssembly (Wasm) implementations for the BLAS routine daxpy for increasing array lengths." style="position:relative,left:15%,width:70%,height:50%"/>
+	<figcaption>
+		Figure 1: Performance comparison of stdlib's C, JavaScript, and WebAssembly (Wasm) implementations for the BLAS routine `daxpy` for increasing array lengths (x-axis). In the Wasm (copy) benchmark, input and output data is copied to and from Wasm memory, respectively, leading to poorer performance.
+	</figcaption>
+</figure>
 
 TODO: Display performance graph. Plain JavaScript can result in smaller bundle sizes, especially when factoring in necessary additional wasm glue code.
 

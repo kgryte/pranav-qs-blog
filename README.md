@@ -215,7 +215,7 @@ daxpy(N, xdata, strideX, ydata, strideY);
 
 At least in this case, not only is the WebAssembly approach less ergonomic, but, as might be expected given the required data movement, there's a negative performance impact, as well.
 
-
+<img src="./daxpy_wasm_comparison_benchmarks_small.png" alt="Grouped column chart displaying a performance comparison of stdlib's C, JavaScript, and WebAssembly (Wasm) implementations for the BLAS routine daxpy for increasing array lengths." style={{position: 'relative', left: '15%', width: '70%', height: '50%'}} />
 
 TODO: Display performance graph. Plain JavaScript can result in smaller bundle sizes, especially when factoring in necessary additional wasm glue code.
 
@@ -244,7 +244,7 @@ In the interim, pure JavaScript fallbacks, supported by robust testing and bench
 
 ## Walkthrough
 
-LAPACK is vast, with approximately 1,700 routines, and implementing even 10% of them within a three-month timeframe is a significant challenge. I found that selecting the right package was, and still is, one of the most difficult tasks I encountered during my internship. It felt akin to being given a collection of coins with values like 1000, 100, 10, 5, and so on, and being asked to select as many as possible to maximize the total value. That essentially summarized my problem.
+TODO: toposort. Bottom-up approach. Knock out leaves.
 
 One day, I reviewed all the available LAPACK routines from netlib-lapack, categorizing them based on difficulty and dependencies. I compiled this information into a list, which can be found at [lapack-tracker-issue](https://github.com/stdlib-js/stdlib/issues/2464). My original approach was to implement the routines in a depth-first manner for each package, which led to the creation of several dependency trees, prioritizing easier implementations.
 

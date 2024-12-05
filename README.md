@@ -213,20 +213,26 @@ With the JavaScript implementation, we can then directly call `daxpy` with our e
 daxpy(N, xdata, strideX, ydata, strideY);
 ```
 
-At least in this case, not only is the WebAssembly approach less ergonomic, but, as might be expected given the required data movement, there's a negative performance impact, as well.
+At least in this case, not only is the WebAssembly approach less ergonomic, but, as might be expected given the required data movement, there's a negative performance impact, as well, as demonstrated in the following figure.
+
+<!-- TODO: remove the following Markdown image and keep the <figure> prior to publishing. The Markdown image is just for local development. -->
 
 ![Grouped column chart displaying a performance comparison of stdlib's C, JavaScript, and WebAssembly (Wasm) implementations for the BLAS routine daxpy for increasing array lengths.](./daxpy_wasm_comparison_benchmarks_small.png)
 
 <figure style="text-align:center">
 	<img src="/posts/implement-lapack-routines-in-stdlib/daxpy_wasm_comparison_benchmarks_small.png" alt="Grouped column chart displaying a performance comparison of stdlib's C, JavaScript, and WebAssembly (Wasm) implementations for the BLAS routine daxpy for increasing array lengths." style="position:relative,left:15%,width:70%,height:50%"/>
 	<figcaption>
-		Figure 1: Performance comparison of stdlib's C, JavaScript, and WebAssembly (Wasm) implementations for the BLAS routine `daxpy` for increasing array lengths (x-axis). In the Wasm (copy) benchmark, input and output data is copied to and from Wasm memory, respectively, leading to poorer performance.
+		Figure 1: Performance comparison of stdlib's C, JavaScript, and WebAssembly (Wasm) implementations for the BLAS routine `daxpy` for increasing array lengths (x-axis). In the Wasm (copy) benchmark, input and output data is copied to and from Wasm memory, leading to poorer performance.
 	</figcaption>
 </figure>
 
-TODO: Display performance graph. Plain JavaScript can result in smaller bundle sizes, especially when factoring in necessary additional wasm glue code.
+In the figure above, I'm displaying a performance comparison of stdlib's C, JavaScript, and WebAssembly (Wasm) implementations for the BLAS routine `daxpy` for increasing array lengths, as enumerated along the x-axis. The y-axis shows a normalized rate relative a baseline C implementation. In the _Wasm_ benchmark, input and output data is allocated and manipulated directly in WebAssembly module memory, and, in the _Wasm (copy)_ benchmark, input and output data is copied to and from WebAssembly module memory, as discussed above. From the chart, we may observe the following:
 
+1. In general, thanks to highly optimized just-in-time (JIT) compilers, JavaScript code, when carefully written, can execute only 2-to-3 times slower than native code. This result is impressive for a loosely typed, dynamically compiled programming language and, for `daxpy`, remains consistent across varying array lengths.
+1. As data sizes and thus the amount of time spent in a WebAssembly module increase, WebAssembly can approach near-native (~1.5x) speed. This result aligns more generally with expected WebAssembly performance.
+1. While WebAssembly can achieve near-native speed, data movement requirements may adversely affect performance, as observed for `daxpy`. In such cases, a well-crafted JavaScript implementation which avoids such requirements can achieve equal, if not better, performance, as is the case for `daxpy`. 
 
+Overall, WebAssembly can offer performance improvements; however, the technology is not a silver bullet and needs to be used carefully in order to realize desired gains. And even when offering superior performance, such gains must be balanced against the costs of increased complexity, potentially larger bundle sizes, and more complex toolchains. For many applications, a plain JavaScript implementation will do just fine. 😅
 
 ## Radical Modularity
 

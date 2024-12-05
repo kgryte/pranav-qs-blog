@@ -234,7 +234,7 @@ In the figure above, I'm displaying a performance comparison of stdlib's C, Java
 
 Overall, WebAssembly can offer performance improvements; however, the technology is not a silver bullet and needs to be used carefully in order to realize desired gains. And even when offering superior performance, such gains must be balanced against the costs of increased complexity, potentially larger bundle sizes, and more complex toolchains. For many applications, a plain JavaScript implementation will do just fine.
 
-## Radical Modularity
+## Radical modularity
 
 Now that I've prosecuted the case against just compiling the entirety of LAPACK to WebAssembly and calling it a day, where does that leave us? Well, if we're going to embrace the stdlib ethos, it leaves us in need of radical modularity.
 
@@ -299,29 +299,13 @@ Given stdlib's demanding documentation and testing requirements, adding support 
 
 ## A multi-phase approach
 
-TODO: rephrase/rewrite
+Building on previous efforts which added BLAS support to stdlib, we decided to follow a similar multi-phase approach when adding LAPACK support in which we first prioritize JavaScript implementations and their associated testing and documentation and then, once tests and documentation are present, back fill C and Fortran implementations and any associated native bindings to hardware-optimized libraries. This approach allows us to put some early points on the board, so to speak, quickly getting APIs in front of users, establishing robust test procedures and benchmarks, and investigating potential avenues for tooling and automation, before diving into the weeds of build toolchains and performance optimizations. But where to even begin?
 
-A common question that arises is why Fortran and C implementations are necessary when the initial goal was to translate the project to JavaScript. This approach is part of a broader, multi-phase strategy. The JavaScript implementation serves as the foundation, allowing us to interface with Fortran and C, leveraging their performance advantages. We also support various accelerators based on the user’s operating system, such as Apple’s accelerator framework, and utilize multithreading capabilities.
+To determine which LAPACK routines to target first, I parsed LAPACK's Fortran source code to generate a call graph. This allowed me to infer on which routines a given routine depended. With the graph in hand, I then performed a topological sort, thus helping me identify routines without dependencies and which will inevitably be building blocks for other routines. While a depth-first approach in which I picked a particular high-level routine and worked backward would enable me to land a specific feature, such an approach might cause me to get bogged down trying to implement routines of increasing complexity. By focusing on the "leaves" of the graph, I could prioritize commonly used routines (i.e., routines with high _indegrees_) and thus maximize my impact by unlocking the ability to deliver multiple higher-level routines either later in my internship or by other contributors.
 
-Since Fortran is not universally supported across all environments, we maintain C implementations as well. This not only facilitates the creation of WebAssembly (Wasm) binaries, which can be used in browser environments, but also simplifies integration with individual packages. While Wasm support is not a primary goal, it remains a viable option.
+With my plan in hand, I was excited to get to work. For my first routine, I chose `dlaswp`, which performs a series of row interchanges on a general rectangular matrix according to a provided list of pivot indices and which is a key building block for LAPACK's LU decomposition routines. And that is when my challenges began...
 
-Implementing the core functionality in JavaScript allows us to establish a comprehensive framework for documentation, testing, and benchmarking. With this solid groundwork, we can then systematically integrate the Fortran and C implementations. One challenge specific to Fortran was resolving build tooling issues that would allow dynamic dependency resolution, which delayed its integration.
-
-In the interim, pure JavaScript fallbacks, supported by robust testing and benchmarking, enable rapid iterations and refinements of the API design and implementation logic, paving the way for future incorporation of Fortran and C components.
-
-## Walkthrough
-
-TODO: toposort. Bottom-up approach. Knock out leaves.
-
-One day, I reviewed all the available LAPACK routines from netlib-lapack, categorizing them based on difficulty and dependencies. I compiled this information into a list, which can be found at [lapack-tracker-issue](https://github.com/stdlib-js/stdlib/issues/2464). My original approach was to implement the routines in a depth-first manner for each package, which led to the creation of several dependency trees, prioritizing easier implementations.
-
-I quickly realized that the depth-first approach would not be feasible, as we did not have the luxury of years to develop and integrate the packages. Instead, I had a strict timeline of just three months to get up to speed, minimize code errors, automate certain processes, and still maintain a steady and positive pace in implementing the packages.
-
-After a discussion with Athan, we decided on a two-pronged strategy to avoid potential bottlenecks: (1) continue working in a depth-first approach to maintain progress while PRs are under review, and (2) focus on implementing packages that are leaf nodes in most dependency trees, thereby establishing a solid foundation for future development OR simply _pickup low hanging fruits_ :)
-
-With the plan set, I opened my first LAPACK pull request (PR), which introduced a JavaScript implementation for dlaswp. The dlaswp routine performs a series of row interchanges on a matrix A using pivot indices stored in IPIV. This PR revealed several challenges that arose during the conversion of the original Fortran implementation to JavaScript. Let’s delve into these challenges:
-
-## Challenges during Fortran to JS conversion
+## Challenges
 
 
 TODO: BLIS.

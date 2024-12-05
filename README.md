@@ -238,7 +238,7 @@ Overall, WebAssembly can offer performance improvements; however, the technology
 
 Now that I've prosecuted the case against just compiling the entirety of LAPACK to WebAssembly and calling it a day, where does that leave us? Well, if we're going to embrace the stdlib ethos, it leaves us in need of radical modularity.
 
-To embrace radical modularity is to recognize that what is best is highly contextual, and, depending on the needs and constraints of user applications, developers need the flexibility to pick the right abstraction. If a developer is writing a Node.js application, that may mean binding to hardware-optimized libraries, such as OpenBLAS, Intel MKL, or Apple Accelerate for superior performance. If a developer is deploying a web application needing a small set of numerical routines, JavaScript is likely the right tool for the job. And if a developer is working on a large, resource intensive WebAssembly application for image editing, then being able to readily compile individual routines as part of the larger application will be paramount. In short, we want a radically modular LAPACK.
+To embrace radical modularity is to recognize that what is best is highly contextual, and, depending on the needs and constraints of user applications, developers need the flexibility to pick the right abstraction. If a developer is writing a Node.js application, that may mean binding to hardware-optimized libraries, such as OpenBLAS, Intel MKL, or Apple Accelerate in order to achieve superior performance. If a developer is deploying a web application needing a small set of numerical routines, JavaScript is likely the right tool for the job. And if a developer is working on a large, resource intensive WebAssembly application (e.g., for image editing or a gaming engine), then being able to easily compile individual routines as part of the larger application will be paramount. In short, we want a radically modular LAPACK.
 
 My mission during the Quansight internship was to lay the groundwork for such an endeavor, to work out the kinks and find the gaps, and to hopefully get us a few steps closer to high-performance linear algebra on the web. But what does radically modularity look like? It all begins with the fundamental unit of functionality, the **package**.
 
@@ -288,17 +288,18 @@ Briefly,
 - **examples**: a folder containing executable demonstration code, which, in addition to serving as documentation, helps developers sanity check implementation behavior.
 - **include**: a folder containing C header files.
 - **lib**: a folder containing JavaScript source implementations, with `index.js` serving as the package entry point and other `*.js` files defining internal implementation modules.
-- **src**: a folder containing C and Fortran source implementations. Each modular LAPACK package contains a (slightly) modified Fortran reference implementation. C files include a plain C implementation which follows the Fortran reference implementation, a wrapper for calling the Fortran reference implementation, a wrapper for calling hardware-optimized libraries (e.g., OpenBLAS) in server-side applications, and a native binding for calling into compiled C from JavaScript in Node.js or a compatible server-side JavaScript runtime.
+- **src**: a folder containing C and Fortran source implementations. Each modular LAPACK package should contain a slightly modified Fortran reference implementation (F77 to free-form Fortran). C files include a plain C implementation which follows the Fortran reference implementation, a wrapper for calling the Fortran reference implementation, a wrapper for calling hardware-optimized libraries (e.g., OpenBLAS) in server-side applications, and a native binding for calling into compiled C from JavaScript in Node.js or a compatible server-side JavaScript runtime.
 - **test**: a folder containing unit tests for testing expected behavior in both JavaScript and native implementations. Tests for native implementations are written in JavaScript and leverage the native binding for interoperation between JavaScript and C/Fortran.
 - **binding.gyp/include.gypi**: build files for compiling Node.js native add-ons, which provide a bridge between JavaScript and native code.
 - **manifest.json**: configuration file for stdlib's internal C package management.
-- **package.json**: package meta data, including the enumeration of external package dependencies.
+- **package.json**: package meta data, including the enumeration of external package dependencies and a path to a plain JavaScript implementation for use in browser-based web applications.
 - **README.md**: primary documentation which includes API signatures and examples for both JavaScript and C interfaces.
 
+Given stdlib's demanding documentation and testing requirements, adding support for each routine is a decent amount of work, but the end result is robust, high-quality code suitable for serving as the foundation for scientific computation on the modern web. But enough with the preliminaries! Let's get down to business!
 
+## A multi-phase approach
 
-
-## Fortran and C implementation
+TODO: rephrase/rewrite
 
 A common question that arises is why Fortran and C implementations are necessary when the initial goal was to translate the project to JavaScript. This approach is part of a broader, multi-phase strategy. The JavaScript implementation serves as the foundation, allowing us to interface with Fortran and C, leveraging their performance advantages. We also support various accelerators based on the user’s operating system, such as Apple’s accelerator framework, and utilize multithreading capabilities.
 

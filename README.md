@@ -6,7 +6,7 @@ Hi! I am [Pranav Goswami](https://github.com/pranavchiku), and, over the past su
 
 Sound interesting? Let's go!
 
-### What is stdlib?
+## What is stdlib?
 
 Readers of this blog are likely Python enthusiasts and industry practitioners who are "in the know" regarding all things NumPy, SciPy, and PyTorch, but you may not be as intimately familiar with the wild world of web technologies. For those coming from the world of scientific Python, the easiest way to think of [stdlib](https://github.com/stdlib-js/stdlib) is as an open source scientific computing library in the mold of NumPy and SciPy providing multi-dimensional array data structures and associated routines for mathematics, statistics, and linear algebra, but which uses JavaScript, rather than Python, as its primary scripting language and is laser-focused on the web ecosystem and its application development paradigms. This focus necessitates some interesting design and project architecture decisions, which make stdlib rather unique when compared to more traditional libraries designed for numerical computation.
 
@@ -53,8 +53,8 @@ const strides = [...];
 const offset = 0;
 
 // Define arrays using a "lower-level" fancy array constructor:
-const x = new FancyArray('float64', [...], shape, strides, offset, 'row-major' );
-const y = new FancyArray('float64', [...], shape, strides, offset, 'row-major' );
+const x = new FancyArray('float64', [...], shape, strides, offset, 'row-major');
+const y = new FancyArray('float64', [...], shape, strides, offset, 'row-major');
 
 // Perform operation:
 daxpy(5.0, x['::2,:,:'], y['::2,:,:']);
@@ -62,20 +62,162 @@ daxpy(5.0, x['::2,:,:'], y['::2,:,:']);
 
 Importantly, not only can you independently install any one of stdlib's over [4,000 packages](https://github.com/stdlib-js), but you can also fix, improve, and remix any one of those packages by forking an associated GitHub repository (e.g., see [`@stdlib/ndarray-fancy`](https://github.com/stdlib-js/ndarray-fancy/tree/main)). And by defining explicit layers of abstraction and dependency trees, stdlib offers you the freedom to choose the right layer of abstraction for your application. In some ways, it's a simple—and, if you're accustomed to conventional scientific software library design, perhaps unorthodox—idea, but, when tightly integrated with the web platform, it has powerful consequences and creates exciting new possibilities!
 
-### TODO: What about WebAssembly?
+## What about WebAssembly?
 
-TODO: why not just compile everything to Wasm and call it a day? Display performance graph. Show code sample demonstrating difference in API design and usage (i.e., not as ergonomic). Manual memory management. Dynamically linking wasm modules requires threading exports and imports. Standalone binaries can end up with duplicated code. Plain JavaScript can result in smaller bundle sizes, especially when factoring in necessary additional wasm glue code.
+Okay, so maybe your interest has piqued; stdlib seems intriguing. But what does this have to do with LAPACK in web browsers? Well, the goal of my summer project was to apply the stdlib ethos—small, narrowly scoped packages which do one thing and do one thing well—in bringing LAPACK to the web.
 
-TODO: show chart comparing Pyodide memory footprint. Compiling NumPy to wasm does not get around the monolithic library problem.
+But wait, you say! That is an extreme undertaking. LAPACK is vast, with approximately 1,700 routines, and implementing even 10% of them within a three-month time frame is a significant challenge. Wouldn't it be better to just compile LAPACK to [WebAssembly](https://webassembly.org), a portable compilation target for programming languages such as C, Go, and Rust, which enables deployment on the web, and call it a day?
+
+Unfortunately, there are several issues with this approach.
+
+1. Compiling Fortran to WebAssembly is still an area of active development (see [1](https://gws.phd/posts/fortran_wasm/), [2](https://pyodide.org/en/0.25.0/project/roadmap.html#find-a-better-way-to-compile-fortran), [3](https://github.com/scipy/scipy/issues/15290), [4](https://github.com/pyodide/pyodide/issues/184), and [5](https://lfortran.org/blog/2023/05/lfortran-breakthrough-now-building-legacy-and-modern-minpack/)). At the time of this post, a common approach is to use [`f2c`](https://netlib.org/f2c/) to compile Fortran to C and then to perform a separate compilation step to convert C to WebAssembly. However, this approach is problematic as `f2c` only fully supports Fortran 77 and the generated code requires extensive patching. Work is underway to develop an LLVM-based Fortran compiler, but gaps and complex toolchains remain.
+1. As described above concerning monolithic libraries in web applications, the vastness of LAPACK is part of the problem. Even if the compilation problem is solved, including a single WebAssembly binary containing all of LAPACK in a web application needing to use only one or two LAPACK routines means considerable dead code, resulting in slower loading times and increased memory consumption.
+1. While powerful, WebAssembly entails a steeper learning curve and more complex set of toolchains. In end user applications, interfacing between JavaScript—a web-native programming language—brings further increased complexity, especially when having to perform manual memory management.
+
+To help illustrate the last point, let's return to the BLAS routine `daxpy`, which performs the operation `y = a*x + y`, with `x` and `y` strided vectors and `a` a scalar constant. If implemented in C, a basic implementation might look like the following code snippet.
+
+```c
+void c_daxpy(const int N, const double alpha, const double *X, const int strideX, double *Y, const int strideY) {
+	int ix;
+	int iy;
+	int i;
+	if (N <= 0) {
+		return;
+	}
+	if (alpha == 0.0) {
+		return;
+	}
+	if (strideX < 0) {
+		ix = (1-N) * strideX;
+	} else {
+		ix = 0;
+	}
+	if (strideY < 0) {
+		iy = (1-N) * strideY;
+	} else {
+		iy = 0;
+	}
+	for (i = 0; i < N; i++) {
+		Y[iy] += alpha * X[ix];
+		ix += strideX;
+		iy += strideY;
+	}
+	return;
+}
+````
+
+After compilation to WebAssembly and loading the WebAssembly binary into our web application and before being able to call the `c_daxpy` routine from JavaScript, we need perform a series of steps. First, we need to instantiate a new WebAssembly module.
+
+```javascript
+const binary = new UintArray([...]);
+
+const mod = new WebAssembly.Module(binary);
+```
+
+Next, we need to define module memory and create a new WebAssembly module instance.
+
+```javascript
+// Initialize 10 pages of memory and allow growth to 100 pages:
+const mem = new WebAssembly.Memory({
+	'initial': 10,  // 640KiB, where each page is 64KiB
+	'maximum': 100  // 6.4MiB
+});
+
+// Create a new module instance:
+const instance = new WebAssembly.Instance(mod, {
+	'env': {
+		'memory': mem
+	}
+});
+```
+
+After creating a module instance, we can now invoke the exported BLAS routine. However, if data is defined outside of module memory, we first need to copy that data to the memory instance and always do so in little-endian byte order.
+
+```javascript
+// External data:
+const xdata = new Float64Array([...]);
+const ydata = new Float64Array([...]);
+
+// Specify a vector length:
+const N = 5;
+
+// Specify vector strides:
+const strideX = 2; // elements
+const strideY = 4;
+
+// Define pointers (i.e., byte offsets) for storing two vectors:
+const xptr = 0;
+const yptr = N * 8; // 8 bytes per double-precision floating-point number
+
+// Create a DataView over module memory:
+const view = new DataView(mem.buffer);
+
+// Write data to the memory instance:
+for (let i = 0; i < N; i++) {
+	view.setFloat64(xptr+(i*8), xdata[i*strideX], true)
+	view.setFloat64(yptr+(i*8), ydata[i*strideY], true)
+}
+```
+
+Now that data is written to module memory, we can call the `c_daxpy` routine.
+
+```javascript
+instance.exports.c_daxpy(N, 5.0, xptr, 1, yptr, 1);
+```
+
+And, finally, if we need to pass the results to a downstream library such as D3 for visualization or further analysis, we need to copy data from module memory back to the original output array.
+
+```javascript
+for (let i = 0; i < N; i++) {
+	ydata[i*strideY] = view.getFloat64(yptr+(i*8), true);
+}
+```
+
+That's a lot of work just to compute `y = a*x + y`. In contrast, compare to a vanilla JavaScript implementation, which might look like the following code snippet.
+
+```javascript
+function daxpy(N, alpha, X, strideX, Y, strideY) {
+	let ix;
+	let iy;
+	let i;
+	if (N <= 0) {
+		return;
+	}
+	if (alpha == 0.0) {
+		return;
+	}
+	if (strideX < 0) {
+		ix = (1-N) * strideX;
+	} else {
+		ix = 0;
+	}
+	if (strideY < 0) {
+		iy = (1-N) * strideY;
+	} else {
+		iy = 0;
+	}
+	for (i = 0; i < N; i++) {
+		Y[iy] += alpha * X[ix];
+		ix += strideX;
+		iy += strideY;
+	}
+	return;
+}
+```
+
+We can then directly call `daxpy` with our externally defined data without the data movement required in the WebAssembly example above.
+
+```javascript
+daxpy(N, xdata, strideX, ydata, strideY);
+```
+
+Not only is the WebAssembly approach less ergonomic (in this case!), but, as might be expected, there's a negative performance impact, as well.
 
 
 
+TODO: Display performance graph. Dynamically linking wasm modules requires threading exports and imports. Standalone binaries can end up with duplicated code. Plain JavaScript can result in smaller bundle sizes, especially when factoring in necessary additional wasm glue code.
 
-### Motivation
 
-**TODO**: this is not a strong motivation and was also not the primary aim of this project. Higher performance is not ensured. We did not set out to write routines solely in JS. It just happened to play out that way.
-
-Fortran has long been a foundational programming language for scientific computing, while JavaScript dominates the web ecosystem. I’ve observed various organizations attempting to compile Fortran codebases into WebAssembly (Wasm) for browser execution. This is where I believe stdlib is simplifying the process by offering APIs that enable execution directly via Node.js in a web environment. Leveraging the JavaScript standard library for direct execution on the web offers significant performance advantages, primarily by eliminating the need for implicit data transfers between WebAssembly (Wasm) and JavaScript. This approach also reduces the number of floating-point operations (FLOPs), and by keeping computations within JavaScript, higher performance is ensured. Additionally, these routines are beneficial for various IoT applications that lack Wasm support, making JavaScript an optimal choice in such contexts. This approach intrigues me, which is why I chose to explore it further.
 
 ## Fortran and C implementation
 
@@ -335,6 +477,14 @@ Enough of these challenges! You may feel free to look at my open/merged PRs at [
 
 We leverage free-form Fortran code extensively to optimize the performance of various BLAS (Basic Linear Algebra Subprograms) and LAPACK (Linear Algebra Package) routines. In response, [Athan](https://www.linkedin.com/in/athanreines/) and I decided to document our methodology on [`How to Call Fortran Routines from JavaScript Using Node.js`](https://blog.stdlib.io/how-to-call-fortran-routines-from-javascript-with-node-js/).
 
-## Future plans & Conclusion
 
-After the internship, I'll try to continue adding packages and if not atleast review PRs that affect the codebase which I worked on. With these, I would like to thank Quansight and Athan Reines for providing me with this opportunity. I learnt a lot, this was a long dream to work as an intern at Quansight and I am happy I fulfiled it. Extending my thanks to Melissa, she is an amazing cordinator, very friendly, joyful, thank you for spending time for us! Thank you all!
+
+
+
+## Conclusion
+
+While the internship has ended, my plan is to continue adding packages and pushing this effort along. Given the immense potential and LAPACK's fundamental importance, we'd love to see this initiative of bringing LAPACK to the web continue to grow, so, if you are interested in helping out and even sponsoring development, please don't hesitate to reach out!
+
+And with that, I would like to thank Quansight and Athan Reines for providing me with this opportunity. I feel incredibly fortunate to have learned so much. This was long a dream of mine to work as an intern at Quansight, and I am happy to have fulfilled it. I want to extend a special thanks to Melissa, who is an amazing mentor and all around wonderful person; thank you for investing so much time in us!
+
+Cheers!

@@ -467,24 +467,24 @@ Thereby, understanding legacy Fortran code is crucial to accurately translating 
 
 At stdlib, we ensure that our implementations are optimized for both row-major and column-major orders. We employ various optimization techniques, such as loop tiling and cache optimization, to enhance performance. While some of these optimizations are already present in Fortran codes, simplifying the translation process, in most cases, we need to identify and implement these optimizations ourselves to achieve optimal performance.
 
----
 
-Additionally, each stdlib package is designed to be independent, allowing users to install individual packages via `npm install <package>`, along with their dependencies in the `node_modules`. To support this modular approach, we conduct comprehensive testing, which includes writing tests for both the normal API and ndarray API, benchmarking their performance, defining and validating types, setting up a REPL environment, and providing a detailed README file with examples to guide users effectively.
+<!--
 
-Enough of these challenges! You may feel free to look at my open/merged PRs at [`pranav-PRs`](https://github.com/stdlib-js/stdlib/pulls/pranavchiku). The tracker is avilable at [`issue-2464`](https://github.com/stdlib-js/stdlib/issues/2464). All the code related to benchmarking and testing done for this blog can be found at [Pranavchiku/QS-blog](https://github.com/pranavchiku/QS-blog).
+FIXME: weave in within the conclusion
 
 ## How to call Fortran routines using JavaScript?
 
 We leverage free-form Fortran code extensively to optimize the performance of various BLAS (Basic Linear Algebra Subprograms) and LAPACK (Linear Algebra Package) routines. In response, [Athan](https://www.linkedin.com/in/athanreines/) and I decided to document our methodology on [`How to Call Fortran Routines from JavaScript Using Node.js`](https://blog.stdlib.io/how-to-call-fortran-routines-from-javascript-with-node-js/).
 
+-->
 
-
+TODO: add status (link to tracker issue)
 
 
 ## Conclusion
 
 While the internship has ended, my plan is to continue adding packages and pushing this effort along. Given the immense potential and LAPACK's fundamental importance, we'd love to see this initiative of bringing LAPACK to the web continue to grow, so, if you are interested in helping out and even sponsoring development, please don't hesitate to reach out!
 
-And with that, I would like to thank Quansight and Athan Reines for providing me with this opportunity. I feel incredibly fortunate to have learned so much. This was long a dream of mine to work as an intern at Quansight, and I am happy to have fulfilled it. I want to extend a special thanks to Melissa, who is an amazing mentor and all around wonderful person; thank you for investing so much time in us!
+And with that, I would like to thank Quansight and [Athan Reines](https://github.com/kgryte) for providing me with this opportunity. I feel incredibly fortunate to have learned so much. This was long a dream of mine to work as an intern at Quansight, and I am happy to have fulfilled it. I want to extend a special thanks to [Melissa Mendonça](https://github.com/melissawm), who is an amazing mentor and all around wonderful person; thank you for investing so much time in us!
 
 Cheers!

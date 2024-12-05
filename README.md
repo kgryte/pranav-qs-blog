@@ -226,23 +226,76 @@ At least in this case, not only is the WebAssembly approach less ergonomic, but,
 	</figcaption>
 </figure>
 
-In the figure above, I'm displaying a performance comparison of stdlib's C, JavaScript, and WebAssembly (Wasm) implementations for the BLAS routine `daxpy` for increasing array lengths, as enumerated along the x-axis. The y-axis shows a normalized rate relative a baseline C implementation. In the _Wasm_ benchmark, input and output data is allocated and manipulated directly in WebAssembly module memory, and, in the _Wasm (copy)_ benchmark, input and output data is copied to and from WebAssembly module memory, as discussed above. From the chart, we may observe the following:
+In the figure above, I'm displaying a performance comparison of stdlib's C, JavaScript, and WebAssembly (Wasm) implementations for the BLAS routine `daxpy` for increasing array lengths, as enumerated along the x-axis. The y-axis shows a normalized rate relative to a baseline C implementation. In the `Wasm` benchmark, input and output data is allocated and manipulated directly in WebAssembly module memory, and, in the `Wasm (copy)` benchmark, input and output data is copied to and from WebAssembly module memory, as discussed above. From the chart, we may observe the following:
 
 1. In general, thanks to highly optimized just-in-time (JIT) compilers, JavaScript code, when carefully written, can execute only 2-to-3 times slower than native code. This result is impressive for a loosely typed, dynamically compiled programming language and, for `daxpy`, remains consistent across varying array lengths.
 1. As data sizes and thus the amount of time spent in a WebAssembly module increase, WebAssembly can approach near-native (~1.5x) speed. This result aligns more generally with expected WebAssembly performance.
 1. While WebAssembly can achieve near-native speed, data movement requirements may adversely affect performance, as observed for `daxpy`. In such cases, a well-crafted JavaScript implementation which avoids such requirements can achieve equal, if not better, performance, as is the case for `daxpy`. 
 
-Overall, WebAssembly can offer performance improvements; however, the technology is not a silver bullet and needs to be used carefully in order to realize desired gains. And even when offering superior performance, such gains must be balanced against the costs of increased complexity, potentially larger bundle sizes, and more complex toolchains. For many applications, a plain JavaScript implementation will do just fine. 😅
+Overall, WebAssembly can offer performance improvements; however, the technology is not a silver bullet and needs to be used carefully in order to realize desired gains. And even when offering superior performance, such gains must be balanced against the costs of increased complexity, potentially larger bundle sizes, and more complex toolchains. For many applications, a plain JavaScript implementation will do just fine.
 
 ## Radical Modularity
 
+Now that I've prosecuted the case against just compiling the entirety of LAPACK to WebAssembly and calling it a day, where does that leave us? Well, if we're going to embrace the stdlib ethos, it leaves us in need of radical modularity.
+
+To embrace radical modularity is to recognize that what is best is highly contextual, and, depending on the needs and constraints of user applications, developers need the flexibility to pick the right abstraction. If a developer is writing a Node.js application, that may mean binding to hardware-optimized libraries, such as OpenBLAS, Intel MKL, or Apple Accelerate for superior performance. If a developer is deploying a web application needing a small set of numerical routines, JavaScript is likely the right tool for the job. And if a developer is working on a large, resource intensive WebAssembly application for image editing, then being able to readily compile individual routines as part of the larger application will be paramount. In short, we want a radically modular LAPACK.
+
+My mission during the Quansight internship was to lay the groundwork for such an endeavor, to work out the kinks and find the gaps, and to hopefully get us a few steps closer to high-performance linear algebra on the web. But what does radically modularity look like? It all begins with the fundamental unit of functionality, the **package**.
+
+Every package in stdlib is its own standalone thing, containing co-localized tests, benchmarks, examples, documentation, build files, and associated meta data (including the enumeration of any dependencies) and defining a clear API surface with the outside world. In order to add LAPACK support to stdlib, that means creating a separate standalone package for each LAPACK routine with the following structure:
+
+```
+├── benchmark
+│   ├── c
+│   │   ├── Makefile
+│   │   └── benchmark.c
+│   ├── fortran
+│   │   ├── Makefile
+│   │   └── benchmark.f
+│   └── benchmark*.js
+├── docs
+│   ├── types
+│   │   ├── index.d.ts
+│   │   └── test.ts
+│   └── repl.txt
+├── examples
+│   ├── c
+│   │   ├── Makefile
+│   │   └── example.c
+│   └── index.js
+├── include/*
+├── lib
+│   ├── index.js
+│   └── *.js
+├── src
+│   ├── Makefile
+│   ├── addon.c
+│   ├── *.c
+│   └── *.f
+├── test
+│   └── test*.js
+├── binding.gyp
+├── include.gypi
+├── manifest.json
+├── package.json
+└── README.md
+```
+
+Briefly,
+
+- **benchmark**: a folder containing micro-benchmarks to assess performance relative to a reference implementation (i.e., reference LAPACK).
+- **docs**: auxiliary documentation including REPL help text and TypeScript declarations defining typed API signatures.
+- **examples**: executable demonstration code, which, in addition to serving as documentation, helps developers sanity check implementation behavior.
+- **include**: C header files.
+- **lib**: JavaScript source implementations, with `index.js` serving as the package entry point and other `*.js` files defining internal implementation modules.
+- **src**: C and Fortran source implementations. Each modular LAPACK package contains a (slightly) modified Fortran reference implementation. C files include a plain C implementation which follows the Fortran reference implementation, a wrapper for calling the Fortran reference implementation, a wrapper for calling hardware-optimized libraries (e.g., OpenBLAS) in server-side applications, and a native binding for calling into compiled C from JavaScript in Node.js or a compatible server-side JavaScript runtime.
+- **test**: unit tests for testing expected behavior in both JavaScript and native implementations. Tests for native implementations are written in JavaScript and leverage the native binding for interoperation between JavaScript and C/Fortran.
+- **binding.gyp/include.gypi**: build files for compiling Node.js native add-ons, which provide a bridge between JavaScript and native code.
+- **manifest.json**: configuration file for stdlib's internal C package management.
+- **package.json**: package meta data, including the enumeration of external package dependencies.
+- **README.md**: primary documentation which includes API signatures and examples for both JavaScript and C interfaces.
 
 
-TODO: anatomy of a package.
-
-TODO: BLIS.
-
-TODO: poor test coverage.
 
 
 ## Fortran and C implementation
@@ -268,6 +321,13 @@ After a discussion with Athan, we decided on a two-pronged strategy to avoid pot
 With the plan set, I opened my first LAPACK pull request (PR), which introduced a JavaScript implementation for dlaswp. The dlaswp routine performs a series of row interchanges on a matrix A using pivot indices stored in IPIV. This PR revealed several challenges that arose during the conversion of the original Fortran implementation to JavaScript. Let’s delve into these challenges:
 
 ## Challenges during Fortran to JS conversion
+
+
+TODO: BLIS.
+
+TODO: poor test coverage.
+
+
 
 1. Supporting both `row-major` and `column-major`.
 

@@ -141,13 +141,13 @@ const ydata = new Float64Array([...]);
 // Specify a vector length:
 const N = 5;
 
-// Specify vector strides:
-const strideX = 2; // elements
+// Specify vector strides (in units of elements):
+const strideX = 2;
 const strideY = 4;
 
 // Define pointers (i.e., byte offsets) for storing two vectors:
 const xptr = 0;
-const yptr = N * 8; // 8 bytes per double-precision floating-point number
+const yptr = N * 8; // 8 bytes per double
 
 // Create a DataView over module memory:
 const view = new DataView(mem.buffer);
@@ -165,7 +165,7 @@ Now that data is written to module memory, we can call the `c_daxpy` routine.
 instance.exports.c_daxpy(N, 5.0, xptr, 1, yptr, 1);
 ```
 
-And, finally, if we need to pass the results to a downstream library such as D3 for visualization or further analysis, we need to copy data from module memory back to the original output array.
+And, finally, if we need to pass the results to a downstream library without support for WebAssembly memory "pointers" (i.e., byte offsets), such as D3, for visualization or further analysis, we need to copy data from module memory back to the original output array.
 
 ```javascript
 for (let i = 0; i < N; i++) {
@@ -211,7 +211,7 @@ We can then directly call `daxpy` with our externally defined data without the d
 daxpy(N, xdata, strideX, ydata, strideY);
 ```
 
-Not only is the WebAssembly approach less ergonomic (in this case!), but, as might be expected, there's a negative performance impact, as well.
+Not only is the WebAssembly approach less ergonomic (at least in this case!), but, as might be expected, there's a negative performance impact, as well.
 
 
 

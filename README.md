@@ -206,13 +206,13 @@ function daxpy(N, alpha, X, strideX, Y, strideY) {
 }
 ```
 
-We can then directly call `daxpy` with our externally defined data without the data movement required in the WebAssembly example above.
+With the JavaScript implementation, we can then directly call `daxpy` with our externally defined data without the data movement required in the WebAssembly example above.
 
 ```javascript
 daxpy(N, xdata, strideX, ydata, strideY);
 ```
 
-Not only is the WebAssembly approach less ergonomic (at least in this case!), but, as might be expected, there's a negative performance impact, as well.
+At least in this case, not only is the WebAssembly approach less ergonomic, but, as might be expected, there's a negative performance impact, as well.
 
 
 

@@ -8,11 +8,11 @@ Sound interesting? Let's go!
 
 ### What is stdlib?
 
-Readers of this blog are likely Python enthusiasts and industry practitioners who are "in the know" regarding all things NumPy, SciPy, and PyTorch, but you may not be as intimately familiar with the wild world of web technologies. For those coming from the world of scientific Python, the easiest way to think of [stdlib](https://github.com/stdlib-js/stdlib) is an open source scientific computing library in the mold of NumPy and SciPy, but which uses JavaScript, rather than Python, as its primary scripting language and is laser-focused on the web ecosystem and its application development paradigms. This focus necessitates some interesting design and project architecture decisions, which make stdlib rather unique when compared to more traditional libraries designed for numerical computation.
+Readers of this blog are likely Python enthusiasts and industry practitioners who are "in the know" regarding all things NumPy, SciPy, and PyTorch, but you may not be as intimately familiar with the wild world of web technologies. For those coming from the world of scientific Python, the easiest way to think of [stdlib](https://github.com/stdlib-js/stdlib) is an open source scientific computing library in the mold of NumPy and SciPy providing multi-dimensional array data structures and associated routines for mathematics, statistics, and linear algebra, but which uses JavaScript, rather than Python, as its primary scripting language and is laser-focused on the web ecosystem and its application development paradigms. This focus necessitates some interesting design and project architecture decisions, which make stdlib rather unique when compared to more traditional libraries designed for numerical computation.
 
-To take NumPy as an example, NumPy is a single monolithic library, where all of its components, outside of optional third-party dependencies, such as OpenBLAS, form a single, indivisible unit. One cannot simply install NumPy [routines for array manipulation](https://numpy.org/doc/stable/reference/routines.array-manipulation.html) without installing all of NumPy. If you are deploying an application which only needs NumPy's `ndarray` object and a couple of manipulation routines, installing and bundling all of NumPy means including a considerable amount of ["dead code"](https://en.wikipedia.org/wiki/Dead_code). In web development parlance, we'd say that NumPy is not ["tree shakeable"](https://en.wikipedia.org/wiki/Tree_shaking). For a normal NumPy installation, that implies at least 30MB of disk space, and at least [15MB of disk space](https://towardsdatascience.com/how-to-shrink-numpy-scipy-pandas-and-matplotlib-for-your-data-product-4ec8d7e86ee4) for a customized build which excludes all debug statements. For SciPy, those numbers can balloon to 130MB and 50MB, respectively. Needless to say, shipping a 15MB library in a web application for just a few functions is a non-starter, especially for developers needing to deploy applications to devices with poor network connectivity or memory constraints.
+To take NumPy as an example, NumPy is a single monolithic library, where all of its components, outside of optional third-party dependencies such as OpenBLAS, form a single, indivisible unit. One cannot simply install NumPy routines for [array manipulation](https://numpy.org/doc/stable/reference/routines.array-manipulation.html) without installing all of NumPy. If you are deploying an application which only needs NumPy's `ndarray` object and a couple of manipulation routines, installing and bundling all of NumPy means including a considerable amount of ["dead code"](https://en.wikipedia.org/wiki/Dead_code). In web development parlance, we'd say that NumPy is not ["tree shakeable"](https://en.wikipedia.org/wiki/Tree_shaking). For a normal NumPy installation, that implies at least 30MB of disk space, and at least [15MB of disk space](https://towardsdatascience.com/how-to-shrink-numpy-scipy-pandas-and-matplotlib-for-your-data-product-4ec8d7e86ee4) for a customized build which excludes all debug statements. For SciPy, those numbers can balloon to 130MB and 50MB, respectively. Needless to say, shipping a 15MB library in a web application for just a few functions is a non-starter, especially for developers needing to deploy web applications to devices with poor network connectivity or memory constraints.
 
-Given the unique constrains of web application development, stdlib takes a bottom-up approach to its design, where every unit of functionality can be installed and consumed independent from unrelated and unused parts of the codebase. By embracing a decomposable software architecture and [radical modularity](https://aredridel.dinhe.net/2016/06/04/radical-modularity/), stdlib affords users the ability to install and use exactly what they need, with little to no excess code beyond a set of APIs and their explicit dependencies, thus ensuring smaller memory footprints, bundle sizes, and faster deployment.
+Given the unique constraints of web application development, stdlib takes a bottom-up approach to its design, where every unit of functionality can be installed and consumed independent of unrelated and unused parts of the codebase. By embracing a decomposable software architecture and [radical modularity](https://aredridel.dinhe.net/2016/06/04/radical-modularity/), stdlib offers users the ability to install and use exactly what they need, with little to no excess code beyond a desired set of APIs and their explicit dependencies, thus ensuring smaller memory footprints, bundle sizes, and faster deployment.
 
 As an example, suppose you are working with two stacks of matrices (e.g., two-dimensional slices of three-dimensional cubes), and you want to select every other slice and perform the common BLAS operation `y += a*x`, where `x` and `y` are [`ndarrays`](https://stdlib.io/docs/api/latest/@stdlib/ndarray/ctor) and `a` is a scalar constant. To do this with NumPy, you'd first install all of NumPy
 
@@ -34,7 +34,7 @@ y = np.asarray(...)
 y[::2,:,:] += 5.0 * x[::2,:,:]
 ```
 
-With stdlib, you'd first install the various units of functionality as separate packages
+With stdlib, in addition to installing as a monolithic library, you can install the various units of functionality as separate packages
 
 ```bash
 npm install @stdlib/ndarray-fancy @stdlib/blas-daxpy
@@ -43,7 +43,7 @@ npm install @stdlib/ndarray-fancy @stdlib/blas-daxpy
 and then perform the various operations
 
 ```javascript
-// Individually import the desired functionality...
+// Individually import desired functionality...
 import FancyArray from '@stdlib/ndarray/fancy';
 import daxpy from '@stdlib/blas/daxpy';
 
@@ -60,9 +60,7 @@ const y = new FancyArray('float64', [...], shape, strides, offset, 'row-major' )
 daxpy(5.0, x['::2,:,:'], y['::2,:,:']);
 ```
 
-Importantly, not only can you independently install any one of stdlib's over [4,000 packages](https://github.com/stdlib-js), but you can also fix, improve, and remix any one of those packages by forking an associated GitHub repository. And by defining explicit layers of abstraction and dependency trees, stdlib offers you the freedom to choose the right layer of abstraction for your application. In some ways, it's a simple idea, but it leads to powerful consequences!
-
-
+Importantly, not only can you independently install any one of stdlib's over [4,000 packages](https://github.com/stdlib-js), but you can also fix, improve, and remix any one of those packages by forking an associated GitHub repository. And by defining explicit layers of abstraction and dependency trees, stdlib offers you the freedom to choose the right layer of abstraction for your application. In some ways, it's a simple--and, if you're accustomed to conventional scientific software library design, perhaps unorthodox--idea, but, when tightly integrated with the web platform, it has powerful consequences!
 
 ### TODO: What about WebAssembly?
 

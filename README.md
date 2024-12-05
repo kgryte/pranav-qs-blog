@@ -284,12 +284,12 @@ Every package in stdlib is its own standalone thing, containing co-localized tes
 Briefly,
 
 - **benchmark**: a folder containing micro-benchmarks to assess performance relative to a reference implementation (i.e., reference LAPACK).
-- **docs**: auxiliary documentation including REPL help text and TypeScript declarations defining typed API signatures.
-- **examples**: executable demonstration code, which, in addition to serving as documentation, helps developers sanity check implementation behavior.
-- **include**: C header files.
-- **lib**: JavaScript source implementations, with `index.js` serving as the package entry point and other `*.js` files defining internal implementation modules.
-- **src**: C and Fortran source implementations. Each modular LAPACK package contains a (slightly) modified Fortran reference implementation. C files include a plain C implementation which follows the Fortran reference implementation, a wrapper for calling the Fortran reference implementation, a wrapper for calling hardware-optimized libraries (e.g., OpenBLAS) in server-side applications, and a native binding for calling into compiled C from JavaScript in Node.js or a compatible server-side JavaScript runtime.
-- **test**: unit tests for testing expected behavior in both JavaScript and native implementations. Tests for native implementations are written in JavaScript and leverage the native binding for interoperation between JavaScript and C/Fortran.
+- **docs**: a folder containing auxiliary documentation including REPL help text and TypeScript declarations defining typed API signatures.
+- **examples**: a folder containing executable demonstration code, which, in addition to serving as documentation, helps developers sanity check implementation behavior.
+- **include**: a folder containing C header files.
+- **lib**: a folder containing JavaScript source implementations, with `index.js` serving as the package entry point and other `*.js` files defining internal implementation modules.
+- **src**: a folder containing C and Fortran source implementations. Each modular LAPACK package contains a (slightly) modified Fortran reference implementation. C files include a plain C implementation which follows the Fortran reference implementation, a wrapper for calling the Fortran reference implementation, a wrapper for calling hardware-optimized libraries (e.g., OpenBLAS) in server-side applications, and a native binding for calling into compiled C from JavaScript in Node.js or a compatible server-side JavaScript runtime.
+- **test**: a folder containing unit tests for testing expected behavior in both JavaScript and native implementations. Tests for native implementations are written in JavaScript and leverage the native binding for interoperation between JavaScript and C/Fortran.
 - **binding.gyp/include.gypi**: build files for compiling Node.js native add-ons, which provide a bridge between JavaScript and native code.
 - **manifest.json**: configuration file for stdlib's internal C package management.
 - **package.json**: package meta data, including the enumeration of external package dependencies.

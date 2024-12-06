@@ -630,7 +630,13 @@ Additionally, you can also support accessing elements in reverse order, such as:
 
 Despite the challenges, unforeseen setbacks, and multiple design iterations, I am happy to report that I was able to open [36 PRs](https://github.com/stdlib-js/stdlib/pulls?q=sort%3Aupdated-desc+is%3Apr+author%3APranavchiku+label%3ALAPACK+) adding support for various LAPACK routines and associated utilities, and I co-authored a blog post with [Athan Reines](https://github.com/kgryte) on ["How to Call Fortran Routines from JavaScript Using Node.js"](https://blog.stdlib.io/how-to-call-fortran-routines-from-javascript-with-node-js/). Obviously not quite 1,700 routines, but a good start! :)
 
-Nevertheless, the future is bright, and we are quite excited about this work. There's still plenty of room for improvement and additional research and development. In particular, we're keen to (1) explore tooling and automation, (2) address build issues when resolving the source files of Fortran dependencies spread across multiple stdlib packages, (3) roll out C and Fortran implementations and native bindings for stdlib's existing LAPACK packages, (4) continue growing stdlib's library of modular LAPACK routines, and (5) identify additional areas for performance optimization.
+Nevertheless, the future is bright, and we are quite excited about this work. There's still plenty of room for improvement and additional research and development. In particular, we're keen to
+
+1. explore tooling and automation.
+2. address build issues when resolving the source files of Fortran dependencies spread across multiple stdlib packages.
+3. roll out C and Fortran implementations and native bindings for stdlib's existing LAPACK packages.
+4. continue growing stdlib's library of modular LAPACK routines.
+5. identify additional areas for performance optimization.
 
 While the internship has ended, my plan is to continue adding packages and pushing this effort along. Given the immense potential and LAPACK's fundamental importance, we'd love to see this initiative of bringing LAPACK to the web continue to grow, so, if you are interested in helping out and even sponsoring development, please don't hesitate to reach out! The folks at Quansight would be more than happy to chat.
 

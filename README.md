@@ -210,7 +210,7 @@ function daxpy(N, alpha, X, strideX, Y, strideY) {
 With the JavaScript implementation, we can then directly call `daxpy` with our externally defined data without the data movement required in the WebAssembly example above.
 
 ```javascript
-daxpy(N, xdata, strideX, ydata, strideY);
+daxpy(N, 5.0, xdata, 1, ydata, 1);
 ```
 
 At least in this case, not only is the WebAssembly approach less ergonomic, but, as might be expected given the required data movement, there's a negative performance impact, as well, as demonstrated in the following figure.

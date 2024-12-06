@@ -10,11 +10,11 @@ Sound interesting? Let's go!
 
 Readers of this blog are likely Python enthusiasts and industry practitioners who are "in the know" regarding all things NumPy, SciPy, and PyTorch, but you may not be as intimately familiar with the wild world of web technologies. For those coming from the world of scientific Python, the easiest way to think of [stdlib](https://github.com/stdlib-js/stdlib) is as an open source scientific computing library in the mold of NumPy and SciPy providing multi-dimensional array data structures and associated routines for mathematics, statistics, and linear algebra, but which uses JavaScript, rather than Python, as its primary scripting language and is laser-focused on the web ecosystem and its application development paradigms. This focus necessitates some interesting design and project architecture decisions, which make stdlib rather unique when compared to more traditional libraries designed for numerical computation.
 
-To take NumPy as an example, NumPy is a single monolithic library, where all of its components, outside of optional third-party dependencies such as OpenBLAS, form a single, indivisible unit. One cannot simply install NumPy routines for [array manipulation](https://numpy.org/doc/stable/reference/routines.array-manipulation.html) without installing all of NumPy. If you are deploying an application which only needs NumPy's `ndarray` object and a couple of manipulation routines, installing and bundling all of NumPy means including a considerable amount of ["dead code"](https://en.wikipedia.org/wiki/Dead_code). In web development parlance, we'd say that NumPy is not ["tree shakeable"](https://en.wikipedia.org/wiki/Tree_shaking). For a normal NumPy installation, this implies at least 30MB of disk space, and at least [15MB of disk space](https://towardsdatascience.com/how-to-shrink-numpy-scipy-pandas-and-matplotlib-for-your-data-product-4ec8d7e86ee4) for a customized build which excludes all debug statements. For SciPy, those numbers can balloon to 130MB and 50MB, respectively. Needless to say, shipping a 15MB library in a web application for just a few functions is a non-starter, especially for developers needing to deploy web applications to devices with poor network connectivity or memory constraints.
+To take NumPy as an example, NumPy is a single monolithic library, where all of its components, outside of optional third-party dependencies such as OpenBLAS, form a single, indivisible unit. One cannot simply install NumPy routines for [array manipulation](https://numpy.org/doc/stable/reference/routines.array-manipulation.html) without installing all of NumPy. If you are deploying an application which only needs NumPy's `ndarray` object and a couple of its manipulation routines, installing and bundling all of NumPy means including a considerable amount of ["dead code"](https://en.wikipedia.org/wiki/Dead_code). In web development parlance, we'd say that NumPy is not ["tree shakeable"](https://en.wikipedia.org/wiki/Tree_shaking). For a normal NumPy installation, this implies at least 30MB of disk space, and at least [15MB of disk space](https://towardsdatascience.com/how-to-shrink-numpy-scipy-pandas-and-matplotlib-for-your-data-product-4ec8d7e86ee4) for a customized build which excludes all debug statements. For SciPy, those numbers can balloon to 130MB and 50MB, respectively. Needless to say, shipping a 15MB library in a web application for just a few functions is a non-starter, especially for developers needing to deploy web applications to devices with poor network connectivity or memory constraints.
 
 Given the unique constraints of web application development, stdlib takes a bottom-up approach to its design, where every unit of functionality can be installed and consumed independent of unrelated and unused parts of the codebase. By embracing a decomposable software architecture and [radical modularity](https://aredridel.dinhe.net/2016/06/04/radical-modularity/), stdlib offers users the ability to install and use exactly what they need, with little-to-no excess code beyond a desired set of APIs and their explicit dependencies, thus ensuring smaller memory footprints, bundle sizes, and faster deployment.
 
-As an example, suppose you are working with two stacks of matrices (e.g., two-dimensional slices of three-dimensional cubes), and you want to select every other slice and perform the common BLAS operation `y += a*x`, where `x` and `y` are [`ndarrays`](https://stdlib.io/docs/api/latest/@stdlib/ndarray/ctor) and `a` is a scalar constant. To do this with NumPy, you'd first install all of NumPy
+As an example, suppose you are working with two stacks of matrices (i.e., two-dimensional slices of three-dimensional cubes), and you want to select every other slice and perform the common BLAS operation `y += a*x`, where `x` and `y` are [`ndarrays`](https://stdlib.io/docs/api/latest/@stdlib/ndarray/ctor) and `a` is a scalar constant. To do this with NumPy, you'd first install all of NumPy
 
 ```bash
 pip install numpy
@@ -73,7 +73,7 @@ Unfortunately, there are several issues with this approach.
 1. Compiling Fortran to WebAssembly is still an area of active development (see [1](https://gws.phd/posts/fortran_wasm/), [2](https://pyodide.org/en/0.25.0/project/roadmap.html#find-a-better-way-to-compile-fortran), [3](https://github.com/scipy/scipy/issues/15290), [4](https://github.com/pyodide/pyodide/issues/184), and [5](https://lfortran.org/blog/2023/05/lfortran-breakthrough-now-building-legacy-and-modern-minpack/)). At the time of this post, a common approach is to use [`f2c`](https://netlib.org/f2c/) to compile Fortran to C and then to perform a separate compilation step to convert C to WebAssembly. However, this approach is problematic as `f2c` only fully supports Fortran 77, and the generated code requires extensive patching. Work is underway to develop an LLVM-based Fortran compiler, but gaps and complex toolchains remain.
 1. As alluded to above in the discussion concerning monolithic libraries in web applications, the vastness of LAPACK is part of the problem. Even if the compilation problem is solved, including a single WebAssembly binary containing all of LAPACK in a web application needing to use only one or two LAPACK routines means considerable dead code, resulting in slower loading times and increased memory consumption.
 1. While one could attempt to compile individual LAPACK routines to standalone WebAssembly binaries, doing so could result in binary bloat, as multiple standalone binaries may contain duplicated code from common dependencies. To mitigate binary bloat, one could attempt to perform module splitting. In this scenario, one first factors out common dependencies into a standalone binary containing shared code and then generates separate binaries for individual APIs. While suitable in some cases, this can quickly get unwieldy, as this approach requires linking individual WebAssembly modules at load-time by stitching together the exports of one or more modules with the imports of one or more other modules. Not only can this be tedious, but this approach also entails a performance penalty due to the fact that, when WebAssembly routines call imported exports, they now must cross over into JavaScript, rather than remaining within WebAssembly. Sound complex? It is!
-1. Apart from WebAssembly modules operating exclusively on scalar input arguments (e.g., computing the sine of a single number), every WebAssembly module instance must be associated with WebAssembly memory, which is allocated in fixed increments of 64KiB (i.e., a "page"). And importantly, as of this blog post, WebAssembly memory can only grow and [never shrink](https://github.com/WebAssembly/memory-control/blob/16dd6b93ab82d0b4b252e3da5451e9b5e452ee62/proposals/memory-control/Overview.md). As there is currently no mechanism for releasing memory to a host, a WebAssembly application's memory footprint can only increase. These two aspects combined increase the likelihood of allocating memory which is never used and memory leaks.
+1. Apart from WebAssembly modules operating exclusively on scalar input arguments (e.g., computing the sine of a single number), every WebAssembly module instance must be associated with WebAssembly memory, which is allocated in fixed increments of 64KiB (i.e., a "page"). And importantly, as of this blog post, WebAssembly memory can only grow and [never shrink](https://github.com/WebAssembly/memory-control/blob/16dd6b93ab82d0b4b252e3da5451e9b5e452ee62/proposals/memory-control/Overview.md). As there is currently no mechanism for releasing memory to a host, a WebAssembly application's memory footprint can only increase. These two aspects combined increase the likelihood of allocating memory which is never used and the prevalence of memory leaks.
 1. Lastly, while powerful, WebAssembly entails a steeper learning curve and a more complex set of often rapidly evolving toolchains. In end-user applications, interfacing between JavaScript—a web-native dynamically-compiled programming language—and WebAssembly further brings increased complexity, especially when having to perform manual memory management.
 
 To help illustrate the last point, let's return to the BLAS routine `daxpy`, which performs the operation `y = a*x + y` and where `x` and `y` are strided vectors and `a` a scalar constant. If implemented in C, a basic implementation might look like the following code snippet.
@@ -154,10 +154,20 @@ const yptr = N * 8; // 8 bytes per double
 // Create a DataView over module memory:
 const view = new DataView(mem.buffer);
 
+// Resolve the first indexed elements in both `xdata` and `ydata`:
+let offsetX = 0;
+if (strideX < 0) {
+	offsetX = (1-N) * strideX;
+}
+let offsetY = 0;
+if (strideY < 0) {
+	offsetY = (1-N) * strideY;
+}
+
 // Write data to the memory instance:
 for (let i = 0; i < N; i++) {
-	view.setFloat64(xptr+(i*8), xdata[i*strideX], true)
-	view.setFloat64(yptr+(i*8), ydata[i*strideY], true)
+	view.setFloat64(xptr+(i*8), xdata[offsetX+(i*strideX)], true);
+	view.setFloat64(yptr+(i*8), ydata[offsetY+(i*strideY)], true);
 }
 ```
 
@@ -171,11 +181,11 @@ And, finally, if we need to pass the results to a downstream library without sup
 
 ```javascript
 for (let i = 0; i < N; i++) {
-	ydata[i*strideY] = view.getFloat64(yptr+(i*8), true);
+	ydata[offsetY+(i*strideY)] = view.getFloat64(yptr+(i*8), true);
 }
 ```
 
-That's a lot of work just to compute `y = a*x + y`. In contrast, compare to a vanilla JavaScript implementation, which might look like the following code snippet.
+That's a lot of work just to compute `y = a*x + y`. In contrast, compare to a plain JavaScript implementation, which might look like the following code snippet.
 
 ```javascript
 function daxpy(N, alpha, X, strideX, Y, strideY) {
@@ -222,13 +232,13 @@ At least in this case, not only is the WebAssembly approach less ergonomic, but,
 <figure style="text-align:center">
 	<img src="/posts/implement-lapack-routines-in-stdlib/daxpy_wasm_comparison_benchmarks_small.png" alt="Grouped column chart displaying a performance comparison of stdlib's C, JavaScript, and WebAssembly (Wasm) implementations for the BLAS routine daxpy for increasing array lengths." style="position:relative,left:15%,width:70%,height:50%"/>
 	<figcaption>
-		Figure 1: Performance comparison of stdlib's C, JavaScript, and WebAssembly (Wasm) implementations for the BLAS routine <i>daxpy</i> for increasing array lengths (x-axis). In the Wasm (copy) benchmark, input and output data is copied to and from Wasm memory, leading to poorer performance.
+		Figure 1: Performance comparison of stdlib's C, JavaScript, and WebAssembly (Wasm) implementations for the BLAS routine <i>daxpy</i> for increasing array lengths (x-axis). In the <i>Wasm (copy)</i> benchmark, input and output data is copied to and from Wasm memory, leading to poorer performance.
 	</figcaption>
 </figure>
 
 In the figure above, I'm displaying a performance comparison of stdlib's C, JavaScript, and WebAssembly (Wasm) implementations for the BLAS routine `daxpy` for increasing array lengths, as enumerated along the x-axis. The y-axis shows a normalized rate relative to a baseline C implementation. In the `Wasm` benchmark, input and output data is allocated and manipulated directly in WebAssembly module memory, and, in the `Wasm (copy)` benchmark, input and output data is copied to and from WebAssembly module memory, as discussed above. From the chart, we may observe the following:
 
-1. In general, thanks to highly optimized just-in-time (JIT) compilers, JavaScript code, when carefully written, can execute only 2-to-3 times slower than native code. This result is impressive for a loosely typed, dynamically compiled programming language and, for `daxpy`, remains consistent across varying array lengths.
+1. In general, thanks to highly optimized just-in-time (JIT) compilers, JavaScript code, when carefully written, can execute only 2-to-3 times slower than native code. This result is impressive for a loosely typed, dynamically compiled programming language and, at least for `daxpy`, remains consistent across varying array lengths.
 1. As data sizes and thus the amount of time spent in a WebAssembly module increase, WebAssembly can approach near-native (~1.5x) speed. This result aligns more generally with expected WebAssembly performance.
 1. While WebAssembly can achieve near-native speed, data movement requirements may adversely affect performance, as observed for `daxpy`. In such cases, a well-crafted JavaScript implementation which avoids such requirements can achieve equal, if not better, performance, as is the case for `daxpy`. 
 
@@ -291,15 +301,15 @@ Briefly,
 - **src**: a folder containing C and Fortran source implementations. Each modular LAPACK package should contain a slightly modified Fortran reference implementation (F77 to free-form Fortran). C files include a plain C implementation which follows the Fortran reference implementation, a wrapper for calling the Fortran reference implementation, a wrapper for calling hardware-optimized libraries (e.g., OpenBLAS) in server-side applications, and a native binding for calling into compiled C from JavaScript in Node.js or a compatible server-side JavaScript runtime.
 - **test**: a folder containing unit tests for testing expected behavior in both JavaScript and native implementations. Tests for native implementations are written in JavaScript and leverage the native binding for interoperation between JavaScript and C/Fortran.
 - **binding.gyp/include.gypi**: build files for compiling Node.js native add-ons, which provide a bridge between JavaScript and native code.
-- **manifest.json**: configuration file for stdlib's internal C package management.
-- **package.json**: package meta data, including the enumeration of external package dependencies and a path to a plain JavaScript implementation for use in browser-based web applications.
-- **README.md**: primary documentation which includes API signatures and examples for both JavaScript and C interfaces.
+- **manifest.json**: a configuration file for stdlib's internal C and Fortran compiled source file package management.
+- **package.json**: a file containing package meta data, including the enumeration of external package dependencies and a path to a plain JavaScript implementation for use in browser-based web applications.
+- **README.md**: a file containing a package's primary documentation, which includes API signatures and examples for both JavaScript and C interfaces.
 
 Given stdlib's demanding documentation and testing requirements, adding support for each routine is a decent amount of work, but the end result is robust, high-quality, and, most importantly, modular code suitable for serving as the foundation for scientific computation on the modern web. But enough with the preliminaries! Let's get down to business!
 
 ## A multi-phase approach
 
-Building on previous efforts which added BLAS support to stdlib, we decided to follow a similar multi-phase approach when adding LAPACK support in which we first prioritize JavaScript implementations and their associated testing and documentation and then, once tests and documentation are present, back fill C and Fortran implementations and any associated native bindings to hardware-optimized libraries. This approach allows us to put some early points on the board, so to speak, quickly getting APIs in front of users, establishing robust test procedures and benchmarks, and investigating potential avenues for tooling and automation, before diving into the weeds of build toolchains and performance optimizations. But where to even begin?
+Building on previous efforts which added BLAS support to stdlib, we decided to follow a similar multi-phase approach when adding LAPACK support in which we first prioritize JavaScript implementations and their associated testing and documentation and then, once tests and documentation are present, back fill C and Fortran implementations and any associated native bindings to hardware-optimized libraries. This approach allows us to put some early points on the board, so to speak, quickly getting APIs in front of users, establishing robust test procedures and benchmarks, and investigating potential avenues for tooling and automation before diving into the weeds of build toolchains and performance optimizations. But where to even begin?
 
 To determine which LAPACK routines to target first, I parsed LAPACK's Fortran source code to generate a call graph. This allowed me to infer the dependency tree for each LAPACK routine. With the graph in hand, I then performed a topological sort, thus helping me identify routines without dependencies and which will inevitably be building blocks for other routines. While a depth-first approach in which I picked a particular high-level routine and worked backward would enable me to land a specific feature, such an approach might cause me to get bogged down trying to implement routines of increasing complexity. By focusing on the "leaves" of the graph, I could prioritize commonly used routines (i.e., routines with high _indegrees_) and thus maximize my impact by unlocking the ability to deliver multiple higher-level routines either later in my internship or by other contributors.
 
@@ -430,7 +440,7 @@ TODO(Pranav): this is the end of the section which needs updating. This comment 
 
 ### Test Coverage
 
-One of the problems with pursuing a bottom-up approach to adding LAPACK support is that explicit unit tests for lower-level utility routines is often non-existent in LAPACK. LAPACK's test suite largely employs a hierarchical testing philosophy in which testing higher-level routines is assumed to ensure that their dependent lower-level routines are functioning correctly as part of an overall workflow. While one can argue that focusing on integration testing over unit testing for lower-level routines is reasonable, as adding tests for every routine could potentially increase the maintenance burden and complexity of LAPACK's testing framework, it means that we couldn't readily rely on prior art for unit testing and would have to come up with comprehensive unit tests for each lower-level routine on our own.
+One of the problems with pursuing a bottom-up approach to adding LAPACK support is that explicit unit tests for lower-level utility routines are often non-existent in LAPACK. LAPACK's test suite largely employs a hierarchical testing philosophy in which testing higher-level routines is assumed to ensure that their dependent lower-level routines are functioning correctly as part of an overall workflow. While one can argue that focusing on integration testing over unit testing for lower-level routines is reasonable, as adding tests for every routine could potentially increase the maintenance burden and complexity of LAPACK's testing framework, it means that we couldn't readily rely on prior art for unit testing and would have to come up with comprehensive standalone unit tests for each lower-level routine on our own.
 
 ### Documentation
 
@@ -571,7 +581,7 @@ TODO: describe results.
 
 Being written in Fortran, LAPACK assumes column-major access order and implements its algorithms accordingly. This presents issues for libraries, such as stdlib, which not only support row-major order, but make it their default memory layout. Were we to simply port LAPACK's Fortran implementations to JavaScript, users providing row-major matrices would experience adverse performance impacts stemming from non-sequential access.
 
-To mitigate adverse performance impacts, we borrowed an idea from [BLIS](https://github.com/flame/blis), a BLAS-like library supporting both row- and column-major memory layouts in BLAS routines, and decided to modify LAPACK implementations to explicitly accommodate both column- and row-major memory layouts when porting LAPACK routines from Fortran to JavaScript and C. For some implementations, such as `dlacpy`, which is similar to the `copy` function defined above, the modifications are straightforward, often involving stride tricks and loop interchange, but, for others, they turned out to be much less straightforward due to specialized matrix handling, varying access patterns, and combinatorial parameterization.
+To mitigate adverse performance impacts, we borrowed an idea from [BLIS](https://github.com/flame/blis), a BLAS-like library supporting both row- and column-major memory layouts in BLAS routines, and decided to modify LAPACK implementations when porting routines from Fortran to JavaScript and C to explicitly accommodate both column- and row-major memory layouts. For some implementations, such as `dlacpy`, which is similar to the `copy` function defined above, the modifications are straightforward, often involving stride tricks and loop interchange, but, for others, they turned out to be much less straightforward due to specialized matrix handling, varying access patterns, and combinatorial parameterization.
 
 ### ndarrays
 
@@ -620,7 +630,7 @@ Additionally, you can also support accessing elements in reverse order, such as:
 
 Despite the challenges, unforeseen setbacks, and multiple design iterations, I am happy to report that I was able to open [36 PRs](https://github.com/stdlib-js/stdlib/pulls?q=sort%3Aupdated-desc+is%3Apr+author%3APranavchiku+label%3ALAPACK+) adding support for various LAPACK routines and associated utilities, and I co-authored a blog post with [Athan Reines](https://github.com/kgryte) on ["How to Call Fortran Routines from JavaScript Using Node.js"](https://blog.stdlib.io/how-to-call-fortran-routines-from-javascript-with-node-js/). Obviously not quite 1,700 routines, but a good start! :)
 
-Nevertheless, the future is bright, and we are quite excited about this work. There's still plenty of room for improvement and additional research and development. In particular, we're keen to (1) explore tooling and automation, (2) address build issues when resolving the source files of Fortran dependencies spread across multiple stdlib packages, (3) roll out C and Fortran implementations and native bindings for existing stdlib LAPACK packages, (4) grow stdlib's library of modular LAPACK routines, and (5) identify additional areas for performance optimization.
+Nevertheless, the future is bright, and we are quite excited about this work. There's still plenty of room for improvement and additional research and development. In particular, we're keen to (1) explore tooling and automation, (2) address build issues when resolving the source files of Fortran dependencies spread across multiple stdlib packages, (3) roll out C and Fortran implementations and native bindings for stdlib's existing LAPACK packages, (4) continue growing stdlib's library of modular LAPACK routines, and (5) identify additional areas for performance optimization.
 
 While the internship has ended, my plan is to continue adding packages and pushing this effort along. Given the immense potential and LAPACK's fundamental importance, we'd love to see this initiative of bringing LAPACK to the web continue to grow, so, if you are interested in helping out and even sponsoring development, please don't hesitate to reach out! The folks at Quansight would be more than happy to chat.
 

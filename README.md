@@ -307,9 +307,13 @@ With my plan in hand, I was excited to get to work. For my first routine, I chos
 
 ## Challenges
 
-### Legacy Fortran code
+### Legacy Fortran
 
-Let’s illustrate this with an example. Consider a function `add` that takes two arguments: `N`, representing the size of the array, and an array `A`, which returns the sum of its elements. Please find the code snippet below.
+Prior to this internship, I was (and still am!) a regular contributor to [LFortran](https://lfortran.org), a modern interactive Fortran compiler built on top of LLVM, and I was feeling fairly confident in my Fortran skills. However, one of my first challenges was simply understanding legacy Fortran code. Let's illustrate this with an example.
+
+TODO: clean up these examples, as several don't make sense.
+
+Consider a function `add` that takes two arguments: `N`, representing the size of the array, and an array `A`, which returns the sum of its elements. Please find the code snippet below.
 
 ```fortran
 integer function add( M, N, A ) result(r)
@@ -418,9 +422,9 @@ One of the problems with pursuing a bottom-up approach to adding LAPACK support 
 
 ### Documentation
 
-Along a similar vein to test coverage, outside of LAPACK itself, finding real-world documented examples showcasing the use of lower-level routines was challenging. While LAPACK routines are consistently preceded by a documentation comment providing descriptions of input arguments and possible return values, without code examples, visualizing and grokking expected input and output values could be hard, especially when dealing with specialized matrices. And while neither the absence of unit tests nor documented examples is the end of the world, it meant that adding LAPACK support to stdlib would be more of a slog than I expected. Writing benchmarks, tests, examples, and documentation was simply going to require more time and effort, potentially limiting the number of routines I could implement.
+Along a similar vein to test coverage, outside of LAPACK itself, finding real-world documented examples showcasing the use of lower-level routines was challenging. While LAPACK routines are consistently preceded by a documentation comment providing descriptions of input arguments and possible return values, without code examples, visualizing and grokking expected input and output values can be challenging, especially when dealing with specialized matrices. And while neither the absence of unit tests nor documented examples is the end of the world, it meant that adding LAPACK support to stdlib would be more of a slog than I expected. Writing benchmarks, tests, examples, and documentation was simply going to require more time and effort, potentially limiting the number of routines I could implement.
 
-### Multiple memory layout orders
+### Memory layout orders
 
 Fortran stores array elements in a `column-major` format, unlike C or JavaScript, which prefer `row-major` storage. Following the approach used in LAPACKE, we decided to introduce a new parameter, order, in each implementation to specify the storage layout. Based on the value of order, there would be distinct implementations and optimizations for each layout. The order we loop through multidimensional arrays can have a big impact on speed. Fortran is as said `column-major`, Meaning consecutive elements of a column are stored next to each other in memory, and we should loop through arrays in this order order of columns unlike conventional looping over rows.
 

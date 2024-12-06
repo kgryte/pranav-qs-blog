@@ -559,13 +559,15 @@ TODO: describe results.
 
 Being written in Fortran, LAPACK assumes column-major access order and implements its algorithms accordingly. This presents issues for libraries, such as stdlib, which not only support row-major order, but make it their default memory layout. Were we to simply port LAPACK's Fortran implementations to JavaScript, users providing row-major matrices would experience adverse performance impacts stemming from non-sequential access.
 
-To mitigate adverse performance impacts, we borrowed an idea from [BLIS](https://github.com/flame/blis), a BLAS-like library supporting both row- and column-major memory layouts in BLAS routines, and decided to modify LAPACK implementations to explicitly accommodate both column- and row-major memory layouts when porting LAPACK routines from Fortran to JavaScript and C. For some implementations, such as `dlacpy`, which is similar to the `copy` function defined above, the modifications are straightforward, often involving stride tricks and loop interchange, but, for others, they turned out to be much less so due to specialized matrix handling, varying access patterns, and combinatorial parameterization.
+To mitigate adverse performance impacts, we borrowed an idea from [BLIS](https://github.com/flame/blis), a BLAS-like library supporting both row- and column-major memory layouts in BLAS routines, and decided to modify LAPACK implementations to explicitly accommodate both column- and row-major memory layouts when porting LAPACK routines from Fortran to JavaScript and C. For some implementations, such as `dlacpy`, which is similar to the `copy` function defined above, the modifications are straightforward, often involving stride tricks and loop interchange, but, for others, they turned out to be much less straightforward due to specialized matrix handling, varying access patterns, and combinatorial parameterization.
 
 ### ndarrays
 
 TODO: discuss BLIS. stdlib was making changes to BLAS and wanted to extend the same ideas to LAPACK. Avoid unnecessary data movement for non-contiguous matrices.
 
 TODO: scope creep and increasing ambition.
+
+Previewed in the discussion of memory layouts, need an offset parameter. LAPACK assumes that matrix data is stored in a single block of memory and only allows specifying the stride of the leading dimension of a matrix. While this allows operating on sub-matrices, it does not allow supporting matrices stored in non-contiguous memory. For non-contiguous multi-dimensional data, libraries, such as NumPy, must copy matrices to temporary buffers in order to ensure contiguous memory before calling into LAPACK. This additional data movement is not ideal, and so we sought to generalize BLIS-style APIs by including offset parameters. As JavaScript does not have an explicit concept of memory addresses and thus pointers in the manner of C, support for offset parameters allows us to avoid temporary typed array view creation by simply specifying the index of the first indexed element.
 
 
 For packages that accept arrays as arguments, we developed a foundational, private version from which two distinct APIs are derived: one for the standard API and another for the ndarray API, both of which are available to end users. The final design was achieved through multiple iterations. The initial design included an `order` parameter, an array argument `A`, and `LDA`, which stands for the leading dimension of the array. Traditional BLAS APIs assume a contiguous row and column order. The `ndarray` APIs make no assumptions, as shown in figure ndarray 1(A) below, allowing users the flexibility to define views over buffers in any desired manner. Consequently, we transitioned to a new design that accepts the order, the array argument `A`, `strideA1` (the stride of the first dimension of `A`), `strideA2` (the stride of the second dimension of `A`), and a final `offsetA` parameter, which serves as an index offset for `A`. In the final iteration, the `order` parameter was removed from the base implementation, as it can be easily inferred from the two stride values.
@@ -602,10 +604,6 @@ Additionally, you can also support accessing elements in reverse order, such as:
 */
 ```
 
-### Optimization
-
-At stdlib, we ensure that our implementations are optimized for both row-major and column-major orders. We employ various optimization techniques, such as loop tiling and cache optimization, to enhance performance. While some of these optimizations are already present in Fortran codes, simplifying the translation process, in most cases, we need to identify and implement these optimizations ourselves to achieve optimal performance.
-
 
 <!--
 
@@ -617,7 +615,7 @@ We leverage free-form Fortran code extensively to optimize the performance of va
 
 -->
 
-TODO: add status (link to tracker issue)
+TODO: add status (link to tracker issue). See "Current Status and Next Steps" section in the quad-dtype blog post
 
 TODO: comment that, despite the challenges, was able to open 30+ PRs and light the way for future contributions.
 

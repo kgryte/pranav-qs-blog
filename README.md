@@ -515,7 +515,7 @@ A = \begin{bmatrix}
 3 & 4 \\
 5 & 6
 \end{bmatrix},
-B = \begin{bmatrix}
+\ B = \begin{bmatrix}
 0 & 0 \\
 0 & 0 \\
 0 & 0

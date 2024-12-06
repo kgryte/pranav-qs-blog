@@ -435,7 +435,7 @@ When storing matrix elements in linear memory, one has two choices: either store
 <figure style="text-align:center">
 	<img src="/posts/implement-lapack-routines-in-stdlib/memory_layout_comparison.png" alt="Schematic demonstrating storing matrix elements in linear memory in either column-major or row-major order" style="position:relative,left:15%,width:70%,height:50%"/>
 	<figcaption>
-		Figure 2: Schematic demonstrating storing matrix elements in linear memory in either column-major (Fortran-style) or row-major (C-style) order. The choice of which layout to use is a matter of convention.
+		Figure 2: Schematic demonstrating storing matrix elements in linear memory in either column-major (Fortran-style) or row-major (C-style) order. The choice of which layout to use is largely a matter of convention.
 	</figcaption>
 </figure>
 
@@ -457,7 +457,7 @@ const y = asarray([1.0, 3.0, 2.0, 4.0], {
 
 While neither memory layout is inherently better than the other, arranging data to ensure sequential access in accordance with the conventions of the underlying storage model is critical in ensuring optimal performance. Modern CPUs are able to process sequential data more efficiently than non-sequential data, which is primarily due to CPU caching which, in turn, exploits spatial locality of reference.
 
-To demonstrate the performance impact of sequential vs non-sequential element access, consider the following function which copies all the elements from a `MxN` matrix `A` to another `MxN` matrix `B` and which does so assuming that matrix elements are stored in column-major order.
+To demonstrate the performance impact of sequential vs non-sequential element access, consider the following function which copies all the elements from an `MxN` matrix `A` to another `MxN` matrix `B` and which does so assuming that matrix elements are stored in column-major order.
 
 ```javascript
 /**
@@ -466,12 +466,12 @@ To demonstrate the performance impact of sequential vs non-sequential element ac
 * @param {integer} M - number of rows
 * @param {integer} N - number of columns
 * @param {Array} A - source matrix
-* @param {integer} strideA1 - stride of the first dimension of `A`
-* @param {integer} strideA2 - stride of the second dimension of `A`
+* @param {integer} strideA1 - index increment to move to the next element in a column
+* @param {integer} strideA2 - index increment to move to the next element in a row
 * @param {integer} offsetA - index of the first indexed element in `A`
 * @param {Array} B - source matrix
-* @param {integer} strideB1 - stride of the first dimension of `B`
-* @param {integer} strideB2 - stride of the second dimension of `B`
+* @param {integer} strideB1 - index increment to move to the next element in a column
+* @param {integer} strideB2 - index increment to move to the next element in a row
 * @param {integer} offsetB - index of the first indexed element in `B`
 */
 function copy(M, N, A, strideA1, strideA2, offsetA, B, strideB1, strideB2, offsetB) {
@@ -536,10 +536,10 @@ If, however, `A` and `B` are both stored in row-major order, the call signature 
 const A = [1, 2, 3, 4, 5, 6];
 const B = [0, 0, 0, 0, 0, 0];
 
-copy(3, 2, A, 3, 1, 0, B, 3, 1, 0);
+copy(3, 2, A, 2, 1, 0, B, 2, 1, 0);
 ```
 
-Notice that, in the latter scenario, we fail to access elements in sequential order within the innermost loop. Instead, the array index "pointers" repeatedly skip ahead before returning to earlier elements in linear memory. In Figure 3, we show the performance impact of non-sequential access.
+Notice that, in the latter scenario, we fail to access elements in sequential order within the innermost loop, as `da0` is `2` and `da1` is `-5` and similarly for `db0` and `db1`. Instead, the array index "pointers" repeatedly skip ahead before returning to earlier elements in linear memory, with `ia = {0, 2, 4, 1, 3, 5}` and `ib` the same. In Figure 3, we show the performance impact of non-sequential access.
 
 TODO: insert chart
 
@@ -558,7 +558,7 @@ TODO: describe results.
 
 Being written in Fortran, LAPACK assumes column-major access order and implements its algorithms accordingly. This presents issues for libraries, such as stdlib, which not only support row-major order, but make it their default memory layout. Were we to simply port LAPACK's Fortran implementations to JavaScript, users providing row-major matrices would experience adverse performance impacts stemming from non-sequential access.
 
-To mitigate adverse performance impacts, we decided to modify LAPACK implementations to explicitly accommodate both column- and row-major memory layouts when porting from Fortran to JavaScript and C. For some implementations, such as `dlacpy`, which is similar to the `copy` function defined above, the modifications are straightforward, often involving stride tricks and loop interchange, but, for others, they are not.
+To mitigate adverse performance impacts, we borrowed an idea from [BLIS](https://github.com/flame/blis), a BLAS-like library supporting both row- and column-major memory layouts in BLAS routines, and decided to modify LAPACK implementations to explicitly accommodate both column- and row-major memory layouts when porting LAPACK routines from Fortran to JavaScript and C. For some implementations, such as `dlacpy`, which is similar to the `copy` function defined above, the modifications are straightforward, often involving stride tricks and loop interchange, but, for others, they turned out to be much less so due to specialized matrix handling, varying access patterns, and combinatorial parameterization.
 
 ### ndarrays
 

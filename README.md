@@ -312,124 +312,7 @@ TODO: BLIS.
 
 TODO: poor test coverage.
 
-
-
-1. Supporting both `row-major` and `column-major`.
-
-Fortran stores array elements in a `column-major` format, unlike C or JavaScript, which prefer `row-major` storage. Following the approach used in LAPACKE, we decided to introduce a new parameter, order, in each implementation to specify the storage layout. Based on the value of order, there would be distinct implementations and optimizations for each layout. The order we loop through multidimensional arrays can have a big impact on speed. Fortran is as said `column-major`, Meaning consecutive elements of a column are stored next to each other in memory, and we should loop through arrays in this order order of columns unlike conventional looping over rows.
-
-<img src="/posts/implement-lapack-routines-in-stdlib/image-3.png" alt="Pictorial representation of how a matrix can be flattened based on row major and column major order" style={{position: 'relative', left: '15%', width: '70%', height: '50%'}} />
-
-Let's illustrate this with an example. Consider a 2D array A of arbitrary size. We have implemented a function that copies the entire contents of matrix A into another matrix B. In `row-major` order iteration, we traverse the array by iterating over each row first, and within each row, we loop through the columns. On the other hand, in `column-major` order iteration, we loop through each column first, followed by the rows within that column. The code snippet below presents a cache-efficient implementation of the `dlacpy` function specifically optimized for `row-major` order traversal.
-
-```javascript
-function dlacpy( M, N, A, strideA1, strideA2, offsetA, B, strideB1, strideB2, offsetB ) {
-  let S0 = N;
-  let S1 = M;
-  let da0 = strideA2;
-  let da1 = strideA1 - S0 * strideA2;
-  let db0 = strideB2;
-  let db1 = strideB1 - S0 * strideB2;
-
-  // Set the pointers to the first indexed elements in the respective matrices...
-  let ia = offsetA;
-  let ib = offsetB;
-
-  // Iterate over the matrix dimensions...
-  for (let i1 = 0; i1 < S1; i1++) {
-    for (let i0 = 0; i0 < S0; i0++) {
-      B[ib] = A[ia];
-      ia += da0;
-      ib += db0;
-    }
-    ia += da1;
-    ib += db1;
-  }
-  return B;
-}
-```
-
-Now, let's examine the plot below, which depicts the relationship between the rate of copying elements and the array size for both `row-major` and `column-major` orders. The plot shows that for smaller arrays, the copying rates for both orders are comparable. However, as the array size increases, the rate of copying for `row-major` order becomes significantly faster than that of `column-major` order. This performance boost is a result of the cache-optimization techniques employed in the implementation, which minimize the number of cache misses in `row-major` order, leading to enhanced efficiency for larger arrays.
-
-> Rate vs Size plot: `row-major` vs `column-major` order
-
-<img src="/posts/implement-lapack-routines-in-stdlib/group-1.png" alt="grouped column chart showing the impact of rate on varying size of matrix" style={{position: 'relative', left: '15%', width: '50%', height: '50%'}} />
-
-Next step involves fixing the the iteration order first to `row-major` and then to `column-major` and compare how increasing the number of rows and columns affects the rate of copying elements from one matrix to another. Intuitively, one might expect that increasing the number of elements in a row would reduce the rate of copying, due to the limited cache size. Let's see if this intuition holds.
-
-From the figure below, it is evident that increasing the row size has a more pronounced impact on the copying rate after a certain threshold. This is due to the limited cache size, resulting in a lower rate for larger row sizes when compared to increasing the column size. On the other hand, the column major plot shows no significant difference in the copying rate when increasing the row or column size in the `column-major` order. This is because `column-major` order experiences more frequent cache misses compared to `row-major` order, regardless of whether the size increase is in the rows or columns, leading to lower efficiency overall for both small and large sizes.
-
-<img src="/posts/implement-lapack-routines-in-stdlib/group-2.png" alt="grouped column chart showing the impact of normalized rate on varying size of different types of matrices" style={{position: 'relative', left: '15%', width: '70%', height: '50%'}} />
-
-Thereby, we need to ensure that our implementations are optimized for both `row-major` and `column-major` orders. We employ various optimization techniques, such as loop tiling and cache optimization, to enhance performance. While some of these optimizations are already present in Fortran codes, simplifying the translation process, in most cases, we need to identify and implement these optimizations ourselves to achieve optimal performance.
-
-> `dlacpy` function with loop interchanged optimized for `column-major` order
-
-With the following diff, we can interchange the loops to optimize the `dlacpy` function for `column-major` order.
-
-```diff
-@@ -233,12 +233,12 @@ function dlacpy( M, N, A, strideA1, strideA2, offsetA, B, strideB1, strideB2, of
-        var i0;
-        var i1;
-
--       S0 = N;
--       S1 = M;
--       da0 = strideA2;
--       da1 = strideA1 - ( S0*strideA2 );
--       db0 = strideB2;
--       db1 = strideB1 - ( S0*strideB2 );
-+       S0 = M;
-+       S1 = N;
-+       da0 = strideA1;
-+       da1 = strideA2 - ( S0*strideA1 );
-+       db0 = strideB1;
-+       db1 = strideB2 - ( S0*strideB1 );
-
-        // Set the pointers to the first indexed elements in the respective matrices...
-        ia = offsetA;
-```
-
-<img src="/posts/implement-lapack-routines-in-stdlib/group-3.png" alt="grouped column chart showing rates before and after performing column major optimization" style={{position: 'relative', left: '15%', width: '70%', height: '50%'}} />
-
-It is evident that the optimized `dlacpy` function for `column-major` order is significantly faster ( almost 5x ) than the `row-major` order, as shown in the plot above. This optimization is crucial for enhancing performance, especially when dealing with large arrays.
-
-2. Supporting `ndarray` APIs
-
-For packages that accept arrays as arguments, we developed a foundational, private version from which two distinct APIs are derived: one for the standard API and another for the ndarray API, both of which are available to end users. The final design was achieved through multiple iterations. The initial design included an `order` parameter, an array argument `A`, and `LDA`, which stands for the leading dimension of the array. Traditional BLAS APIs assume a contiguous row and column order. The `ndarray` APIs make no assumptions, as shown in figure ndarray 1(A) below, allowing users the flexibility to define views over buffers in any desired manner. Consequently, we transitioned to a new design that accepts the order, the array argument `A`, `strideA1` (the stride of the first dimension of `A`), `strideA2` (the stride of the second dimension of `A`), and a final `offsetA` parameter, which serves as an index offset for `A`. In the final iteration, the `order` parameter was removed from the base implementation, as it can be easily inferred from the two stride values.
-
-Let's now understand `ndarray` API using an example of LAPACK routine `dlacpy` that copies a matrix `A` to a matrix `B`. The function definition looks like:
-
-```javascript
-function dlacpy( M, N, A, offsetA, strideA1, strideA2, B, offsetB, strideB1, strideB2 );
-```
-
-<img src="/posts/implement-lapack-routines-in-stdlib/ndarray-example.png" alt="figure showing how stdlib ndarray apis are different from conventional blas apis and an example to copy element from matrix A to matrix B" style={{position: 'relative', left: '25%', width: '50%', height: '50%'}} />
-
-Suppose you want to copy the matrix A to B using the ndarray API, as illustrated in the graphic above. This operation is not feasible with conventional LAPACK/BLAS APIs, but you can easily achieve it by running the dlacpy function with the following arguments:
-
-```javascript
-B = dlacpy(5, 4, A, 8, 2, 1, B, 10, 2, 5);
-```
-
-Not only just this, you may also support accessing elements in reverse order like:
-
-```javascript
-B = dlacpy(5, 4, A, 8, 2, 1, B, -10, -2, B.length - 6);
-```
-
-Additionally, you can also support accessing elements in reverse order, such as:
-
-```javascript
-/*
-[ 999, 999, 999, 999, 999 ]
-[  20, 999,  18, 999,  12 ]
-[ 999, 999, 999, 999, 999 ]
-[  10, 999,   4, 999,   2 ]
-[ 999, 999, 999, 999, 999 ]
-*/
-```
-
-3. Understanding legacy fortran code
+### Legacy Fortran code
 
 Let’s illustrate this with an example. Consider a function `add` that takes two arguments: `N`, representing the size of the array, and an array `A`, which returns the sum of its elements. Please find the code snippet below.
 
@@ -534,7 +417,123 @@ function main() {
 
 Thereby, understanding legacy Fortran code is crucial to accurately translating it to JavaScript, ensuring that the logic is correctly implemented to avoid discrepancies.
 
-3. Optimization
+
+### Multiple memory layout orders
+
+Fortran stores array elements in a `column-major` format, unlike C or JavaScript, which prefer `row-major` storage. Following the approach used in LAPACKE, we decided to introduce a new parameter, order, in each implementation to specify the storage layout. Based on the value of order, there would be distinct implementations and optimizations for each layout. The order we loop through multidimensional arrays can have a big impact on speed. Fortran is as said `column-major`, Meaning consecutive elements of a column are stored next to each other in memory, and we should loop through arrays in this order order of columns unlike conventional looping over rows.
+
+<img src="/posts/implement-lapack-routines-in-stdlib/image-3.png" alt="Pictorial representation of how a matrix can be flattened based on row major and column major order" style={{position: 'relative', left: '15%', width: '70%', height: '50%'}} />
+
+Let's illustrate this with an example. Consider a 2D array A of arbitrary size. We have implemented a function that copies the entire contents of matrix A into another matrix B. In `row-major` order iteration, we traverse the array by iterating over each row first, and within each row, we loop through the columns. On the other hand, in `column-major` order iteration, we loop through each column first, followed by the rows within that column. The code snippet below presents a cache-efficient implementation of the `dlacpy` function specifically optimized for `row-major` order traversal.
+
+```javascript
+function dlacpy( M, N, A, strideA1, strideA2, offsetA, B, strideB1, strideB2, offsetB ) {
+  let S0 = N;
+  let S1 = M;
+  let da0 = strideA2;
+  let da1 = strideA1 - S0 * strideA2;
+  let db0 = strideB2;
+  let db1 = strideB1 - S0 * strideB2;
+
+  // Set the pointers to the first indexed elements in the respective matrices...
+  let ia = offsetA;
+  let ib = offsetB;
+
+  // Iterate over the matrix dimensions...
+  for (let i1 = 0; i1 < S1; i1++) {
+    for (let i0 = 0; i0 < S0; i0++) {
+      B[ib] = A[ia];
+      ia += da0;
+      ib += db0;
+    }
+    ia += da1;
+    ib += db1;
+  }
+  return B;
+}
+```
+
+Now, let's examine the plot below, which depicts the relationship between the rate of copying elements and the array size for both `row-major` and `column-major` orders. The plot shows that for smaller arrays, the copying rates for both orders are comparable. However, as the array size increases, the rate of copying for `row-major` order becomes significantly faster than that of `column-major` order. This performance boost is a result of the cache-optimization techniques employed in the implementation, which minimize the number of cache misses in `row-major` order, leading to enhanced efficiency for larger arrays.
+
+> Rate vs Size plot: `row-major` vs `column-major` order
+
+<img src="/posts/implement-lapack-routines-in-stdlib/group-1.png" alt="grouped column chart showing the impact of rate on varying size of matrix" style={{position: 'relative', left: '15%', width: '50%', height: '50%'}} />
+
+Next step involves fixing the the iteration order first to `row-major` and then to `column-major` and compare how increasing the number of rows and columns affects the rate of copying elements from one matrix to another. Intuitively, one might expect that increasing the number of elements in a row would reduce the rate of copying, due to the limited cache size. Let's see if this intuition holds.
+
+From the figure below, it is evident that increasing the row size has a more pronounced impact on the copying rate after a certain threshold. This is due to the limited cache size, resulting in a lower rate for larger row sizes when compared to increasing the column size. On the other hand, the column major plot shows no significant difference in the copying rate when increasing the row or column size in the `column-major` order. This is because `column-major` order experiences more frequent cache misses compared to `row-major` order, regardless of whether the size increase is in the rows or columns, leading to lower efficiency overall for both small and large sizes.
+
+<img src="/posts/implement-lapack-routines-in-stdlib/group-2.png" alt="grouped column chart showing the impact of normalized rate on varying size of different types of matrices" style={{position: 'relative', left: '15%', width: '70%', height: '50%'}} />
+
+Thereby, we need to ensure that our implementations are optimized for both `row-major` and `column-major` orders. We employ various optimization techniques, such as loop tiling and cache optimization, to enhance performance. While some of these optimizations are already present in Fortran codes, simplifying the translation process, in most cases, we need to identify and implement these optimizations ourselves to achieve optimal performance.
+
+> `dlacpy` function with loop interchanged optimized for `column-major` order
+
+With the following diff, we can interchange the loops to optimize the `dlacpy` function for `column-major` order.
+
+```diff
+@@ -233,12 +233,12 @@ function dlacpy( M, N, A, strideA1, strideA2, offsetA, B, strideB1, strideB2, of
+        var i0;
+        var i1;
+
+-       S0 = N;
+-       S1 = M;
+-       da0 = strideA2;
+-       da1 = strideA1 - ( S0*strideA2 );
+-       db0 = strideB2;
+-       db1 = strideB1 - ( S0*strideB2 );
++       S0 = M;
++       S1 = N;
++       da0 = strideA1;
++       da1 = strideA2 - ( S0*strideA1 );
++       db0 = strideB1;
++       db1 = strideB2 - ( S0*strideB1 );
+
+        // Set the pointers to the first indexed elements in the respective matrices...
+        ia = offsetA;
+```
+
+<img src="/posts/implement-lapack-routines-in-stdlib/group-3.png" alt="grouped column chart showing rates before and after performing column major optimization" style={{position: 'relative', left: '15%', width: '70%', height: '50%'}} />
+
+It is evident that the optimized `dlacpy` function for `column-major` order is significantly faster ( almost 5x ) than the `row-major` order, as shown in the plot above. This optimization is crucial for enhancing performance, especially when dealing with large arrays.
+
+### ndarrays
+
+For packages that accept arrays as arguments, we developed a foundational, private version from which two distinct APIs are derived: one for the standard API and another for the ndarray API, both of which are available to end users. The final design was achieved through multiple iterations. The initial design included an `order` parameter, an array argument `A`, and `LDA`, which stands for the leading dimension of the array. Traditional BLAS APIs assume a contiguous row and column order. The `ndarray` APIs make no assumptions, as shown in figure ndarray 1(A) below, allowing users the flexibility to define views over buffers in any desired manner. Consequently, we transitioned to a new design that accepts the order, the array argument `A`, `strideA1` (the stride of the first dimension of `A`), `strideA2` (the stride of the second dimension of `A`), and a final `offsetA` parameter, which serves as an index offset for `A`. In the final iteration, the `order` parameter was removed from the base implementation, as it can be easily inferred from the two stride values.
+
+Let's now understand `ndarray` API using an example of LAPACK routine `dlacpy` that copies a matrix `A` to a matrix `B`. The function definition looks like:
+
+```javascript
+function dlacpy( M, N, A, offsetA, strideA1, strideA2, B, offsetB, strideB1, strideB2 );
+```
+
+<img src="/posts/implement-lapack-routines-in-stdlib/ndarray-example.png" alt="figure showing how stdlib ndarray apis are different from conventional blas apis and an example to copy element from matrix A to matrix B" style={{position: 'relative', left: '25%', width: '50%', height: '50%'}} />
+
+Suppose you want to copy the matrix A to B using the ndarray API, as illustrated in the graphic above. This operation is not feasible with conventional LAPACK/BLAS APIs, but you can easily achieve it by running the dlacpy function with the following arguments:
+
+```javascript
+B = dlacpy(5, 4, A, 8, 2, 1, B, 10, 2, 5);
+```
+
+Not only just this, you may also support accessing elements in reverse order like:
+
+```javascript
+B = dlacpy(5, 4, A, 8, 2, 1, B, -10, -2, B.length - 6);
+```
+
+Additionally, you can also support accessing elements in reverse order, such as:
+
+```javascript
+/*
+[ 999, 999, 999, 999, 999 ]
+[  20, 999,  18, 999,  12 ]
+[ 999, 999, 999, 999, 999 ]
+[  10, 999,   4, 999,   2 ]
+[ 999, 999, 999, 999, 999 ]
+*/
+```
+
+### Optimization
 
 At stdlib, we ensure that our implementations are optimized for both row-major and column-major orders. We employ various optimization techniques, such as loop tiling and cache optimization, to enhance performance. While some of these optimizations are already present in Fortran codes, simplifying the translation process, in most cases, we need to identify and implement these optimizations ourselves to achieve optimal performance.
 

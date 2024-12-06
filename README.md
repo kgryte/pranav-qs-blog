@@ -311,9 +311,11 @@ With my plan in hand, I was excited to get to work. For my first routine, I chos
 
 Prior to my internship, I was (and still am!) a regular contributor to [LFortran](https://lfortran.org), a modern interactive Fortran compiler built on top of LLVM, and I was feeling fairly confident in my Fortran skills. However, one of my first challenges was simply understanding legacy Fortran code. Let's illustrate this with an example.
 
-TODO: clean up these examples, as several don't make sense. This entire section needs a complete rewrite.
+TODO(Pranav): clean up the following examples, as several don't make sense. This entire section from here onward needs a complete rewrite.
 
 Consider a function `add` that takes two arguments: `N`, representing the size of the array, and an array `A`, which returns the sum of its elements. Please find the code snippet below.
+
+FIXME: the text says two arguments, but the code snippet shows three arguments. `num` is declared but never used. It is not clear why we are using a nested loop. Without seeing the `add` implementation, this program is inscrutable.
 
 ```fortran
 integer function add( M, N, A ) result(r)
@@ -352,6 +354,8 @@ end function
 
 - `add` function to compute sum of elements over a column
 
+FIXME: this function definition is effectively indistinguishable from the previous function definition. It is just a copy-paste and replace `N` with `M`. If there is a difference, for the lay Python reader, the difference is entirely not obvious.
+
 ```fortran
 integer function add( M, A ) result(r)
   integer, intent(in) :: M
@@ -370,11 +374,15 @@ If we attempt to convert these functions to JavaScript while assuming a column-m
 
 The definition of the add function will include two additional arguments: offsetA and strideA.
 
+FIXME: why does the offset come before the stride? This is not stdlib convention.
+
 ```javascript
 function add( M, N, A, offsetA, strideA );
 ```
 
 - JS translation of program considering `add` function to compute sum of elements over a row
+
+FIXME: this "translation" is incorrect. Again, the `add` function is shown to have 5 arguments, but you only call with 4 arguments. The matrix has 12 elements but you call `add` 12 times. `num` is declared but never used. Etc. Etc. 
 
 ```javascript
 function main() {
@@ -396,6 +404,8 @@ function main() {
 
 - JS translation of program considering `add` function to compute sum of elements over a column
 
+FIXME: this "translation" is incorrect.
+
 ```javascript
 function main() {
   let i;
@@ -415,6 +425,8 @@ function main() {
 ```
 
 Thereby, understanding legacy Fortran code is crucial to accurately translating it to JavaScript, ensuring that the logic is correctly implemented to avoid discrepancies.
+
+TODO(Pranav): this is the end of the section which needs updating. This comment can be removed once updated.
 
 ### Test Coverage
 

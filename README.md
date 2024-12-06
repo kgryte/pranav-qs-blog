@@ -426,7 +426,7 @@ Along a similar vein to test coverage, outside of LAPACK itself, finding real-wo
 
 ### Memory layout orders
 
-When storing matrix elements in linear memory, one has two choices: either store columns contiguously or rows contiguously (see Figure 2). The former memory layout is referred to as **column-major** order and the latter as **row-major** order. The choice of which layout to use is largely a matter of convention. For example, Fortran stores elements in column-major order, and C stores elements in row-major order. Higher-level libraries, such as NumPy and stdlib, support both column- and row-major orders, allowing you to configure the layout of a multi-dimensional array during array creation.
+When storing matrix elements in linear memory, one has two choices: either store columns contiguously or rows contiguously (see Figure 2). The former memory layout is referred to as **column-major** order and the latter as **row-major** order.
 
 <!-- TODO: remove the following Markdown image and keep the <figure> prior to publishing. The Markdown image is just for local development. -->
 
@@ -438,6 +438,8 @@ When storing matrix elements in linear memory, one has two choices: either store
 		Figure 2: Schematic demonstrating storing matrix elements in linear memory in either column-major (Fortran-style) or row-major (C-style) order. The choice of which layout to use is largely a matter of convention.
 	</figcaption>
 </figure>
+
+The choice of which layout to use is largely a matter of convention. For example, Fortran stores elements in column-major order, and C stores elements in row-major order. Higher-level libraries, such as NumPy and stdlib, support both column- and row-major orders, allowing you to configure the layout of a multi-dimensional array during array creation.
 
 ```javascript
 import asarray from '@stdlib/ndarray-array';

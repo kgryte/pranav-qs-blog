@@ -627,15 +627,16 @@ We leverage free-form Fortran code extensively to optimize the performance of va
 
 -->
 
-TODO: add status (link to tracker issue). See "Current Status and Next Steps" section in the quad-dtype blog post
+## Current status and next steps
 
-TODO: comment that, despite the challenges, was able to open 30+ PRs and light the way for future contributions.
+Despite the challenges, unforeseen setbacks, and multiple design iterations, I am happy to report that I was able to open [36 PRs](https://github.com/stdlib-js/stdlib/pulls?q=sort%3Aupdated-desc+is%3Apr+author%3APranavchiku+label%3ALAPACK+), adding support for various LAPACK routines and associated utilities. Not quite 1,700 routines, but a good start! :)
 
+Nevertheless, the future is bright, and we are quite excited about this work. There's still plenty of room for improvement and additional research and development. In particular, we're keen to (1) explore tooling and automation, (2) resolve build issues when resolving the source files of Fortran dependencies spread across multiple stdlib packages, and (3) identify additional areas for performance optimization.
 
-## Conclusion
+While the internship has ended, my plan is to continue adding packages and pushing this effort along. Given the immense potential and LAPACK's fundamental importance, we'd love to see this initiative of bringing LAPACK to the web continue to grow, so, if you are interested in helping out and even sponsoring development, please don't hesitate to reach out! The folks at Quansight would be more than happy to chat.
 
-While the internship has ended, my plan is to continue adding packages and pushing this effort along. Given the immense potential and LAPACK's fundamental importance, we'd love to see this initiative of bringing LAPACK to the web continue to grow, so, if you are interested in helping out and even sponsoring development, please don't hesitate to reach out!
+## Acknowledgments
 
-And with that, I would like to thank Quansight and [Athan Reines](https://github.com/kgryte) for providing me with this opportunity. I feel incredibly fortunate to have learned so much. Being an intern at Quansight was long a dream of mine, and I am very grateful to have fulfilled it. I want to extend a special thanks to [Melissa Mendonça](https://github.com/melissawm), who is an amazing mentor and all around wonderful person; thank you for investing so much time in us!
+And with that, I would like to thank Quansight and [Athan Reines](https://github.com/kgryte) for providing me with this opportunity. I feel incredibly fortunate to have learned so much. Being an intern at Quansight was long a dream of mine, and I am very grateful to have fulfilled it. I want to extend a special thanks to [Melissa Mendonça](https://github.com/melissawm), who is an amazing mentor and all around wonderful person; thank you for investing so much time in us! And thank you to everyone else at Quansight for helping me out in ways both big and small along the way.
 
 Cheers!

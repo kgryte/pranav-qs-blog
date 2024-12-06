@@ -430,6 +430,8 @@ When storing matrix elements in linear memory, one has two choices: either store
 
 <!-- TODO: remove the following Markdown image and keep the <figure> prior to publishing. The Markdown image is just for local development. -->
 
+TODO: remove white background from image
+
 ![Schematic demonstrating storing matrix elements in linear memory in either column-major or row-major order](./memory_layout_comparison.png)
 
 <figure style="text-align:center">
@@ -512,10 +514,7 @@ A = \begin{bmatrix}
 1 & 2 \\
 3 & 4 \\
 5 & 6
-\end{bmatrix}
-$$
-
-$$
+\end{bmatrix},
 B = \begin{bmatrix}
 0 & 0 \\
 0 & 0 \\

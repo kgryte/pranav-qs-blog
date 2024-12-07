@@ -452,7 +452,7 @@ When storing matrix elements in linear memory, one has two choices: either store
 
 <!-- TODO: remove the following Markdown image and keep the <figure> prior to publishing. The Markdown image is just for local development. -->
 
-TODO: remove white background from image
+FIXME: replace as 1) the image was lifted from <https://craftofcoding.wordpress.com/2017/02/03/column-major-vs-row-major-arrays-does-it-matter/> and 2) the image should have a transparent background.
 
 ![Schematic demonstrating storing matrix elements in linear memory in either column-major or row-major order](./memory_layout_comparison.png)
 
@@ -585,11 +585,28 @@ To mitigate adverse performance impacts, we borrowed an idea from [BLIS](https:/
 
 ### ndarrays
 
+TODO: discuss generalization of two-dimensional strided matrices to multi-dimensional arrays (aka ndarrays).
+
+<!-- TODO: remove the following Markdown image and keep the <figure> prior to publishing. The Markdown image is just for local development. -->
+
+![Diagram illustrating the generalization of LAPACK strided array conventions to non-contiguous strided arrays](./lapack_vs_ndarray_conventions.png)
+
+<figure style="text-align:center">
+	<img src="/posts/implement-lapack-routines-in-stdlib/lapack_vs_ndarray_conventions.png" alt="Diagram illustrating the generalization of LAPACK strided array conventions to non-contiguous strided arrays" style="position:relative,left:15%,width:70%,height:50%"/>
+	<figcaption>
+		Figure TODO: a) A 5-by-5 contiguous matrix stored in column-major order, in accordance with LAPACK conventions. b) A 3-by-3 non-contiguous sub-matrix stored in column-major order. Sub-matrices can be operated on in LAPACK by providing a pointer to the first indexed element and specifying the stride of the leading (i.e., first) dimension. In LAPACK, the stride of the trailing (i.e., second) dimension is always assumed to be unity. c) A 3-by-3 non-contiguous sub-matrix stored in column-major order having non-unit strides, thus generalizing LAPACK stride conventions to both leading and trailing dimensions.
+	</figcaption>
+</figure>
+
+TODO: discuss figure above.
+
 TODO: discuss BLIS. stdlib was making changes to BLAS and wanted to extend the same ideas to LAPACK. Avoid unnecessary data movement for non-contiguous matrices.
 
 TODO: scope creep and increasing ambition.
 
 Previewed in the discussion of memory layouts, need an offset parameter. LAPACK assumes that matrix data is stored in a single block of memory and only allows specifying the stride of the leading dimension of a matrix. While this allows operating on sub-matrices, it does not allow supporting matrices stored in non-contiguous memory. For non-contiguous multi-dimensional data, libraries, such as NumPy, must copy matrices to temporary buffers in order to ensure contiguous memory before calling into LAPACK. This additional data movement is not ideal, and so we sought to generalize BLIS-style APIs by including offset parameters. As JavaScript does not have an explicit concept of memory addresses and thus pointers in the manner of C, support for offset parameters allows us to avoid temporary typed array view creation by simply specifying the index of the first indexed element.
+
+TODO: shift the computation of the index of the first element to user land, rather than the implementation. For ndarrays, this is part of the ndarray meta data. Show refactor of `daxpy` without the `ix` and `iy` initial logic. Furthermore, allow generalization to arbitrary access order (LAPACK often assumes stride of second dimension is positive 1).
 
 
 For packages that accept arrays as arguments, we developed a foundational, private version from which two distinct APIs are derived: one for the standard API and another for the ndarray API, both of which are available to end users. The final design was achieved through multiple iterations. The initial design included an `order` parameter, an array argument `A`, and `LDA`, which stands for the leading dimension of the array. Traditional BLAS APIs assume a contiguous row and column order. The `ndarray` APIs make no assumptions, as shown in figure ndarray 1(A) below, allowing users the flexibility to define views over buffers in any desired manner. Consequently, we transitioned to a new design that accepts the order, the array argument `A`, `strideA1` (the stride of the first dimension of `A`), `strideA2` (the stride of the second dimension of `A`), and a final `offsetA` parameter, which serves as an index offset for `A`. In the final iteration, the `order` parameter was removed from the base implementation, as it can be easily inferred from the two stride values.

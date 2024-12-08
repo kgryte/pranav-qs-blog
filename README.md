@@ -585,7 +585,7 @@ To mitigate adverse performance impacts, we borrowed an idea from [BLIS](https:/
 
 ### ndarrays
 
-TODO: discuss generalization of two-dimensional strided matrices to multi-dimensional arrays (aka ndarrays).
+LAPACK routines primarily operate on matrices stored in linear memory and whose elements are accessed according to specified dimensions and the stride of the leading (i.e., first) dimension. Dimensions specify the number of elements in each row and column, respectively. The stride specifies how many elements in linear memory must be skipped in order to reach of the first element of the next row. LAPACK assumes that elements belonging to the same column are always contiguous (i.e., adjacent in linear memory). Figure TODO provides a visual representation of LAPACK conventions (specifically, see schematics (a) and (b)).
 
 <!-- TODO: remove the following Markdown image and keep the <figure> prior to publishing. The Markdown image is just for local development. -->
 
@@ -594,13 +594,45 @@ TODO: discuss generalization of two-dimensional strided matrices to multi-dimens
 <figure style="text-align:center">
 	<img src="/posts/implement-lapack-routines-in-stdlib/lapack_vs_ndarray_conventions.png" alt="Diagram illustrating the generalization of LAPACK strided array conventions to non-contiguous strided arrays" style="position:relative,left:15%,width:70%,height:50%"/>
 	<figcaption>
-		Figure TODO: a) A 5-by-5 contiguous matrix stored in column-major order, in accordance with LAPACK conventions. b) A 3-by-3 non-contiguous sub-matrix stored in column-major order. Sub-matrices can be operated on in LAPACK by providing a pointer to the first indexed element and specifying the stride of the leading (i.e., first) dimension. In LAPACK, the stride of the trailing (i.e., second) dimension is always assumed to be unity. c) A 3-by-3 non-contiguous sub-matrix stored in column-major order having non-unit strides, thus generalizing LAPACK stride conventions to both leading and trailing dimensions.
+		Figure TODO: a) A 5-by-5 contiguous matrix stored in column-major order. b) A 3-by-3 non-contiguous sub-matrix stored in column-major order. Sub-matrices can be operated on in LAPACK by providing a pointer to the first indexed element and specifying the stride of the leading (i.e., first) dimension. In this case, the stride of leading dimension is five, even though there are only three elements per column, due to the non-contiguity of sub-matrix elements in linear memory when stored as part of a larger matrix. In LAPACK, the stride of the trailing (i.e., second) dimension is always assumed to be unity. c) A 3-by-3 non-contiguous sub-matrix stored in column-major order having non-unit strides and generalizing LAPACK stride conventions to both leading and trailing dimensions. This generalization underpins stdlib's multi-dimensional arrays (also referred to as "ndarrays").
 	</figcaption>
 </figure>
 
-TODO: discuss figure above.
+Libraries, such as NumPy and stdlib, generalize LAPACK's strided array conventions to support
 
-TODO: discuss BLIS. stdlib was making changes to BLAS and wanted to extend the same ideas to LAPACK. Avoid unnecessary data movement for non-contiguous matrices.
+1. non-unit strides in the last dimension (see Figure TODO (c)).
+2. negative strides for any dimension. LAPACK requires that the stride of the leading dimension be positive.
+3. multi-dimensional arrays having an arbitrary number of dimensions.
+
+Support for non-unit strides in the last dimension ensures support for O(1) creation of non-contiguous views (also known as "slices") of linear memory, without requiring explicit data movement. For example, consider the following code snippet which creates such views in stdlib.
+
+```javascript
+import linspace from '@stdlib/array-linspace'
+import FancyArray from '@stdlib/ndarray-fancy';
+
+// Define the two-dimensional array shown in Figure TODO (a):
+const x = new FancyArray('float64', linspace(0, 24, 25), [5, 5], [5, 1], 0, 'row-major');
+// returns <FancyArray>
+
+// Create a sub-matrix view shown in Figure TODO (b):
+const v1 = x['1:4,:3'];
+// returns <FancyArray>
+
+// Create a sub-matrix view shown in Figure TODO (c):
+const v2 = x['1:4,::2'];
+// returns <FancyArray>
+
+// Assert that all arrays share to the same underlying memory buffer:
+const b1 = ( v1.data.buffer === x.data.buffer );
+// returns true
+
+const b2 = ( v2.data.buffer === x.data.buffer );
+// returns true
+```
+
+Without support for non-unit strides in the last dimension, the view returned by the expression `x['1:4,::2']` would not be possible, as one would need to copy selected elements to a new memory buffer to ensure contiguity.
+
+TODO: discuss negative stride support.
 
 TODO: scope creep and increasing ambition.
 

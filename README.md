@@ -452,14 +452,12 @@ When storing matrix elements in linear memory, one has two choices: either store
 
 <!-- TODO: remove the following Markdown image and keep the <figure> prior to publishing. The Markdown image is just for local development. -->
 
-FIXME: replace as 1) the image was lifted from <https://craftofcoding.wordpress.com/2017/02/03/column-major-vs-row-major-arrays-does-it-matter/> and 2) the image should have a transparent background.
-
-![Schematic demonstrating storing matrix elements in linear memory in either column-major or row-major order](./memory_layout_comparison.png)
+![Schematic demonstrating storing matrix elements in linear memory in either column-major or row-major order](./row_vs_column_major.png)
 
 <figure style="text-align:center">
-	<img src="/posts/implement-lapack-routines-in-stdlib/memory_layout_comparison.png" alt="Schematic demonstrating storing matrix elements in linear memory in either column-major or row-major order" style="position:relative,left:15%,width:70%,height:50%"/>
+	<img src="/posts/implement-lapack-routines-in-stdlib/row_vs_column_major.png" alt="Schematic demonstrating storing matrix elements in linear memory in either column-major or row-major order" style="position:relative,left:15%,width:70%,height:50%"/>
 	<figcaption>
-		Figure 2: Schematic demonstrating storing matrix elements in linear memory in either column-major (Fortran-style) or row-major (C-style) order. The choice of which layout to use is largely a matter of convention.
+		Figure 2: Schematic demonstrating storing matrix elements in linear memory in either (a) column-major (Fortran-style) or (b)row-major (C-style) order. The choice of which layout to use is largely a matter of convention.
 	</figcaption>
 </figure>
 
@@ -568,10 +566,10 @@ TODO: insert chart
 
 <!-- TODO: remove the following Markdown image and keep the <figure> prior to publishing. The Markdown image is just for local development. -->
 
-![Performance comparison of copying matrices stored in either row- or column-major order when the underlying algorithm assumes column-major order](./memory_layout_comparison.png)
+![Performance comparison of copying matrices stored in either row- or column-major order when the underlying algorithm assumes column-major order](./row_vs_column_major.png)
 
 <figure style="text-align:center">
-	<img src="/posts/implement-lapack-routines-in-stdlib/memory_layout_comparison.png" alt="Performance comparison of copying matrices stored in either row- or column-major order when the underlying algorithm assumes column-major order" style="position:relative,left:15%,width:70%,height:50%"/>
+	<img src="/posts/implement-lapack-routines-in-stdlib/row_vs_column_major.png" alt="Performance comparison of copying matrices stored in either row- or column-major order when the underlying algorithm assumes column-major order" style="position:relative,left:15%,width:70%,height:50%"/>
 	<figcaption>
 		Figure 3: TODO: add caption
 	</figcaption>
@@ -585,7 +583,7 @@ To mitigate adverse performance impacts, we borrowed an idea from [BLIS](https:/
 
 ### ndarrays
 
-LAPACK routines primarily operate on matrices stored in linear memory and whose elements are accessed according to specified dimensions and the stride of the leading (i.e., first) dimension. Dimensions specify the number of elements in each row and column, respectively. The stride specifies how many elements in linear memory must be skipped in order to reach of the first element of the next row. LAPACK assumes that elements belonging to the same column are always contiguous (i.e., adjacent in linear memory). Figure TODO provides a visual representation of LAPACK conventions (specifically, see schematics (a) and (b)).
+LAPACK routines primarily operate on matrices stored in linear memory and whose elements are accessed according to specified dimensions and the stride of the leading (i.e., first) dimension. Dimensions specify the number of elements in each row and column, respectively. The stride specifies how many elements in linear memory must be skipped in order to access the first element of the next row from the first element of the previous row. LAPACK assumes that elements belonging to the same column are always contiguous (i.e., adjacent in linear memory). Figure TODO provides a visual representation of LAPACK conventions (specifically, schematics (a) and (b)).
 
 <!-- TODO: remove the following Markdown image and keep the <figure> prior to publishing. The Markdown image is just for local development. -->
 
@@ -602,9 +600,9 @@ Libraries, such as NumPy and stdlib, generalize LAPACK's strided array conventio
 
 1. non-unit strides in the last dimension (see Figure TODO (c)).
 2. negative strides for any dimension. LAPACK requires that the stride of the leading dimension be positive.
-3. multi-dimensional arrays having an arbitrary number of dimensions.
+3. multi-dimensional arrays having more than two dimensions.
 
-Support for non-unit strides in the last dimension ensures support for O(1) creation of non-contiguous views (also known as "slices") of linear memory, without requiring explicit data movement. For example, consider the following code snippet which creates such views in stdlib.
+Support for non-unit strides in the last dimension ensures support for O(1) creation of non-contiguous views of linear memory without requiring explicit data movement. This views are often called "slices". As an example, consider the following code snippet which creates such views using APIs provided by stdlib.
 
 ```javascript
 import linspace from '@stdlib/array-linspace'
@@ -630,9 +628,13 @@ const b2 = ( v2.data.buffer === x.data.buffer );
 // returns true
 ```
 
-Without support for non-unit strides in the last dimension, the view returned by the expression `x['1:4,::2']` would not be possible, as one would need to copy selected elements to a new memory buffer to ensure contiguity.
+Without support for non-unit strides in the last dimension, returning a view from the expression `x['1:4,::2']` would not be possible, as one would need to copy selected elements to a new memory buffer in order to ensure contiguity.
 
-TODO: discuss negative stride support.
+Support for negative strides enables O(1) reversal and rotation of elements along one or more dimensions. For example, to flip a matrix top-to-bottom and left-to-right, one need only negate the strides. To create a transposed view of a two-dimensional array, one need only swap the dimensions and associated strides. Building on the previous code snippet, the following code snippet performs such a transposition.
+
+```javascript
+
+```
 
 TODO: scope creep and increasing ambition.
 

@@ -2,7 +2,7 @@
 
 Web applications are rapidly emerging as a new frontier for high-performance scientific computation and AI-enabled end-user experiences. Underpinning the ML/AI revolution is linear algebra, a branch of mathematics concerning linear equations and their representations in vectors spaces and via matrices. [LAPACK](https://netlib.org/lapack/) ("**L**inear **A**lgebra **Pack**age") is a fundamental software library for numerical linear algebra, providing robust, battle-tested implementations of common matrix operations. Despite LAPACK being a foundational component of most numerical computing programming languages and libraries, a comprehensive, high-quality LAPACK implementation tailored to the unique constraints of the web has yet to materialize. That is...until now.
 
-Hi! I am [Pranav Goswami](https://github.com/pranavchiku), and, over the past summer, I worked with [Athan Reines](https://github.com/kgryte) to add initial LAPACK support to [stdlib](https://github.com/stdlib-js/stdlib), a fundamental library for scientific computation written in C and JavaScript and optimized for use in web browsers and other web-native environments, such as Node.js and Deno. In this blog post, I'll discuss my journey, some expected and unexpected (!) challenges, and the road ahead. With a little bit of luck, my hope is that this work provides a critical building block in making web browsers a first-class environment for numerical computation and machine learning and portends a future of more powerful AI-enabled web applications.
+Hi! I am [Pranav Goswami](https://github.com/pranavchiku), and, over the past summer, I worked with [Athan Reines](https://github.com/kgryte) to add initial LAPACK support to [stdlib](https://github.com/stdlib-js/stdlib), a fundamental library for scientific computation written in C and JavaScript and optimized for use in web browsers and other web-native environments, such as Node.js and Deno. In this blog post, I'll discuss my journey, some expected and unexpected (!) challenges, and the road ahead. My hope is that this work, with a little bit of luck, provides a critical building block in making web browsers a first-class environment for numerical computation and machine learning and portends a future of more powerful AI-enabled web applications.
 
 Sound interesting? Let's go!
 
@@ -457,7 +457,7 @@ When storing matrix elements in linear memory, one has two choices: either store
 <figure style="text-align:center">
 	<img src="/posts/implement-lapack-routines-in-stdlib/row_vs_column_major.png" alt="Schematic demonstrating storing matrix elements in linear memory in either column-major or row-major order" style="position:relative,left:15%,width:70%,height:50%"/>
 	<figcaption>
-		Figure 2: Schematic demonstrating storing matrix elements in linear memory in either (a) column-major (Fortran-style) or (b)row-major (C-style) order. The choice of which layout to use is largely a matter of convention.
+		Figure 2: Schematic demonstrating storing matrix elements in linear memory in either (a) column-major (Fortran-style) or (b) row-major (C-style) order. The choice of which layout to use is largely a matter of convention.
 	</figcaption>
 </figure>
 
@@ -620,7 +620,7 @@ const v1 = x['1:4,:3'];
 const v2 = x['1:4,::2'];
 // returns <FancyArray>
 
-// Assert that all arrays share to the same underlying memory buffer:
+// Assert that all arrays share the same underlying memory buffer:
 const b1 = ( v1.data.buffer === x.data.buffer );
 // returns true
 
@@ -630,10 +630,33 @@ const b2 = ( v2.data.buffer === x.data.buffer );
 
 Without support for non-unit strides in the last dimension, returning a view from the expression `x['1:4,::2']` would not be possible, as one would need to copy selected elements to a new memory buffer in order to ensure contiguity.
 
-Support for negative strides enables O(1) reversal and rotation of elements along one or more dimensions. For example, to flip a matrix top-to-bottom and left-to-right, one need only negate the strides. To create a transposed view of a two-dimensional array, one need only swap the dimensions and associated strides. Building on the previous code snippet, the following code snippet performs such a transposition.
+Support for negative strides enables O(1) reversal and rotation of elements along one or more dimensions (see Figure TODO). For example, to flip a matrix top-to-bottom and left-to-right, one need only negate the strides. Building on the previous code snippet, the following code snippet demonstrates flipping elements about one or more axes.
 
 ```javascript
+import linspace from '@stdlib/array-linspace'
+import FancyArray from '@stdlib/ndarray-fancy';
 
+// Define the two-dimensional array shown in Figure TODO (a):
+const x = new FancyArray('float64', linspace(0, 24, 25), [5, 5], [5, 1], 0, 'row-major');
+
+// Reverse elements along each row as shown in Figure TODO (b):
+const v1 = x['::-1,:'];
+
+// Reverse elements along each column as shown in in Figure TODO (c):
+const v2 = x[':,::-1'];
+
+// Reverse elements along both columns and rows as shown in in Figure TODO (d):
+const v3 = x['::-1,::-1'];
+
+// Assert that all arrays share the same underlying memory buffer:
+const b1 = ( v1.data.buffer === x.data.buffer );
+// returns true
+
+const b2 = ( v2.data.buffer === x.data.buffer );
+// returns true
+
+const b3 = ( v3.data.buffer === x.data.buffer );
+// returns true
 ```
 
 TODO: scope creep and increasing ambition.

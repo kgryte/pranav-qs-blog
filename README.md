@@ -562,8 +562,6 @@ copy(3, 2, A, 2, 1, 0, B, 2, 1, 0);
 
 Notice that, in the latter scenario, we fail to access elements in sequential order within the innermost loop, as `da0` is `2` and `da1` is `-5` and similarly for `db0` and `db1`. Instead, the array index "pointers" repeatedly skip ahead before returning to earlier elements in linear memory, with `ia = {0, 2, 4, 1, 3, 5}` and `ib` the same. In Figure 3, we show the performance impact of non-sequential access.
 
-TODO: insert chart
-
 <!-- TODO: remove the following Markdown image and keep the <figure> prior to publishing. The Markdown image is just for local development. -->
 
 ![Performance comparison of copying matrices stored in either row- or column-major order when the underlying algorithm assumes column-major order](./dlacpy_row_vs_column_major_comparison_benchmarks_small.png)
@@ -571,11 +569,11 @@ TODO: insert chart
 <figure style="text-align:center">
 	<img src="/posts/implement-lapack-routines-in-stdlib/dlacpy_row_vs_column_major_comparison_benchmarks_small.png" alt="Performance comparison of copying matrices stored in either row- or column-major order when the underlying algorithm assumes column-major order" style="position:relative,left:15%,width:70%"/>
 	<figcaption>
-		Figure 3: TODO: add caption
+		Figure 3: Performance comparison when providing square column-major versus row-major matrices to <i>copy</i>, when <i>copy</i> assumes sequential element access according to column-major order. The x-axis enumerates increasing matrix sizes (i.e., number of elements). All rates are normalized relative to column-major results for a corresponding matrix size.
 	</figcaption>
 </figure>
 
-TODO: describe results.
+From the figure, we may observe that column- and row-major performance is roughly equivalent until we operate on square matrices having more than 1e5 elements. For 1e6 elements, providing a row-major matrix to `copy` results in a >25% performance decrease, and, for 1e7 elements, we observe a more than 85% performance decrease. The significant performance impact may be attributed to decreased locality of reference when operating on row-major matrices within `copy`, as implemented above.
 
 Being written in Fortran, LAPACK assumes column-major access order and implements its algorithms accordingly. This presents issues for libraries, such as stdlib, which not only support row-major order, but make it their default memory layout. Were we to simply port LAPACK's Fortran implementations to JavaScript, users providing row-major matrices would experience adverse performance impacts stemming from non-sequential access.
 

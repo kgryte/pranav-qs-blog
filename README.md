@@ -581,7 +581,7 @@ To mitigate adverse performance impacts, we borrowed an idea from [BLIS](https:/
 
 ### ndarrays
 
-LAPACK routines primarily operate on matrices stored in linear memory and whose elements are accessed according to specified dimensions and the stride of the leading (i.e., first) dimension. Dimensions specify the number of elements in each row and column, respectively. The stride specifies how many elements in linear memory must be skipped in order to access the first element of the next row from the first element of the previous row. LAPACK assumes that elements belonging to the same column are always contiguous (i.e., adjacent in linear memory). Figure 4 provides a visual representation of LAPACK conventions (specifically, schematics (a) and (b)).
+LAPACK routines primarily operate on matrices stored in linear memory and whose elements are accessed according to specified dimensions and the stride of the leading (i.e., first) dimension. Dimensions specify the number of elements in each row and column, respectively. The stride specifies how many elements in linear memory must be skipped in order to access the next element of a row. LAPACK assumes that elements belonging to the same column are always contiguous (i.e., adjacent in linear memory). Figure 4 provides a visual representation of LAPACK conventions (specifically, schematics (a) and (b)).
 
 <!-- TODO: remove the following Markdown image and keep the <figure> prior to publishing. The Markdown image is just for local development. -->
 
@@ -596,8 +596,8 @@ LAPACK routines primarily operate on matrices stored in linear memory and whose 
 
 Libraries, such as NumPy and stdlib, generalize LAPACK's strided array conventions to support
 
-1. non-unit strides in the last dimension (see Figure 4 (c)). LAPACK assumes that the last dimension of a matrix always has unit stride.
-2. negative strides for any dimension. LAPACK requires that the stride of the leading dimension be positive.
+1. non-unit strides in the last dimension (see Figure 4 (c)). LAPACK assumes that the last dimension of a matrix always has unit stride (i.e., elements within a column are stored contiguously in linear memory).
+2. negative strides for any dimension. LAPACK requires that the stride of a leading matrix dimension be positive.
 3. multi-dimensional arrays having more than two dimensions. LAPACK only explicitly supports strided vectors and (sub)matrices.
 
 Support for non-unit strides in the last dimension ensures support for O(1) creation of non-contiguous views of linear memory without requiring explicit data movement. These views are often called "slices". As an example, consider the following code snippet which creates such views using APIs provided by stdlib.
@@ -635,7 +635,7 @@ Without support for non-unit strides in the last dimension, returning a view fro
 <figure style="text-align:center">
 	<img src="/posts/implement-lapack-routines-in-stdlib/flip_and_rotate_stride_tricks.png" alt="Schematics illustrating the use of stride manipulation to create flipped and rotated views of matrix elements stored in linear memory" style="position:relative,left:15%,width:70%"/>
 	<figcaption>
-		Figure 5: Schematics illustrating the use of stride manipulation to create flipped and rotated views of matrix elements stored in linear memory. For all sub-schematics, strides are listed as <code>[trailing_dimension, leading_dimension]</code>. Implicit for each schematic is an "offset", which indicates the index of the first indexed element such that, for a matrix <i>A</i>, the element <i>A<sub>ij</sub></i> is resolved according to <code>i*strides[0] + j*strides[1] + offset</code>. a) Given a 3-by-3 matrix stored in column-major order, one can manipulate the strides of the leading and trailing dimensions to create views in which matrix elements along one or more axes are accessed in reverse order. b) Using similar stride manipulation, one can create rotated views of matrix elements relative to their arrangement within linear memory.
+		Figure 5: Schematics illustrating the use of stride manipulation to create flipped and rotated views of matrix elements stored in linear memory. For all sub-schematics, strides are listed as <code>[trailing_dimension, leading_dimension]</code>. Implicit for each schematic is an "offset", which indicates the index of the first indexed element such that, for a matrix <i>A</i>, the element <i>A<sub>ij</sub></i> is resolved according to <code>i*strides[1] + j*strides[0] + offset</code>. a) Given a 3-by-3 matrix stored in column-major order, one can manipulate the strides of the leading and trailing dimensions to create views in which matrix elements along one or more axes are accessed in reverse order. b) Using similar stride manipulation, one can create rotated views of matrix elements relative to their arrangement within linear memory.
 	</figcaption>
 </figure>
 

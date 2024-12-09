@@ -630,6 +630,17 @@ const b2 = ( v2.data.buffer === x.data.buffer );
 
 Without support for non-unit strides in the last dimension, returning a view from the expression `x['1:4,::2']` would not be possible, as one would need to copy selected elements to a new memory buffer in order to ensure contiguity.
 
+<!-- TODO: remove the following Markdown image and keep the <figure> prior to publishing. The Markdown image is just for local development. -->
+
+![Schematics illustrating the use of stride manipulation to create flipped and rotated views of matrix elements stored in linear memory](./flip_and_rotate_stride_tricks.png)
+
+<figure style="text-align:center">
+	<img src="/posts/implement-lapack-routines-in-stdlib/flip_and_rotate_stride_tricks.png" alt="Schematics illustrating the use of stride manipulation to create flipped and rotated views of matrix elements stored in linear memory" style="position:relative,left:15%,width:70%"/>
+	<figcaption>
+		Figure TODO: a) Given a 3-by-3 matrix stored in column-major order, one can manipulate the strides of the leading and trailing dimensions to create views in which matrix elements along one or more axes are accessed in reverse order. b) Using similar stride manipulation, one can create rotated views of matrix elements relative to their arrangement within linear memory.
+	</figcaption>
+</figure>
+
 Support for negative strides enables O(1) reversal and rotation of elements along one or more dimensions (see Figure TODO). For example, to flip a matrix top-to-bottom and left-to-right, one need only negate the strides. Building on the previous code snippet, the following code snippet demonstrates reversing elements about one or more axes.
 
 ```javascript
@@ -658,17 +669,6 @@ const b2 = ( v2.data.buffer === x.data.buffer );
 const b3 = ( v3.data.buffer === x.data.buffer );
 // returns true
 ```
-
-<!-- TODO: remove the following Markdown image and keep the <figure> prior to publishing. The Markdown image is just for local development. -->
-
-![Schematics illustrating the use of stride manipulation to create flipped and rotated views of matrix elements stored in linear memory](./flip_and_rotate_stride_tricks.png)
-
-<figure style="text-align:center">
-	<img src="/posts/implement-lapack-routines-in-stdlib/flip_and_rotate_stride_tricks.png" alt="Schematics illustrating the use of stride manipulation to create flipped and rotated views of matrix elements stored in linear memory" style="position:relative,left:15%,width:70%"/>
-	<figcaption>
-		Figure TODO: a) Given a 3-by-3 matrix stored in column-major order, one can manipulate the strides of the leading and trailing dimensions to create views in which matrix elements along one or more axes are accessed in reverse order. b) Using similar stride manipulation, one can create rotated views of matrix elements relative to their arrangement within linear memory.
-	</figcaption>
-</figure>
 
 TODO: scope creep and increasing ambition.
 

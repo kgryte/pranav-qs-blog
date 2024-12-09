@@ -615,7 +615,7 @@ const v1 = x['1:4,:3'];
 // returns <FancyArray>
 
 // Create a sub-matrix view shown in Figure 4 (c):
-const v2 = x['1:4,::2'];
+const v2 = x['::2,::2'];
 // returns <FancyArray>
 
 // Assert that all arrays share the same underlying memory buffer:
@@ -626,7 +626,7 @@ const b2 = ( v2.data.buffer === x.data.buffer );
 // returns true
 ```
 
-Without support for non-unit strides in the last dimension, returning a view from the expression `x['1:4,::2']` would not be possible, as one would need to copy selected elements to a new memory buffer in order to ensure contiguity.
+Without support for non-unit strides in the last dimension, returning a view from the expression `x['::2,::2']` would not be possible, as one would need to copy selected elements to a new memory buffer in order to ensure contiguity.
 
 <!-- TODO: remove the following Markdown image and keep the <figure> prior to publishing. The Markdown image is just for local development. -->
 

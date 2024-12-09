@@ -436,7 +436,7 @@ function main() {
 
 Thereby, understanding legacy Fortran code is crucial to accurately translating it to JavaScript, ensuring that the logic is correctly implemented to avoid discrepancies.
 
-TODO(Pranav): this is the end of the section which needs updating. This comment can be removed once updated.
+TODO(Pranav): this is the end of the section which needs updating. This comment can be removed once the above content is updated.
 
 ### Test Coverage
 
@@ -569,7 +569,7 @@ Notice that, in the latter scenario, we fail to access elements in sequential or
 <figure style="text-align:center">
 	<img src="/posts/implement-lapack-routines-in-stdlib/dlacpy_row_vs_column_major_comparison_benchmarks_small.png" alt="Performance comparison of copying matrices stored in either row- or column-major order when the underlying algorithm assumes column-major order" style="position:relative,left:15%,width:70%"/>
 	<figcaption>
-		Figure 3: Performance comparison when providing square column-major versus row-major matrices to <i>copy</i>, when <i>copy</i> assumes sequential element access according to column-major order. The x-axis enumerates increasing matrix sizes (i.e., number of elements). All rates are normalized relative to column-major results for a corresponding matrix size.
+		Figure 3: Performance comparison when providing square column-major versus row-major matrices to <i>copy</i> when <i>copy</i> assumes sequential element access according to column-major order. The x-axis enumerates increasing matrix sizes (i.e., number of elements). All rates are normalized relative to column-major results for a corresponding matrix size.
 	</figcaption>
 </figure>
 

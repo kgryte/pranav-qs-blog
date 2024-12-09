@@ -646,7 +646,7 @@ import linspace from '@stdlib/array-linspace'
 import FancyArray from '@stdlib/ndarray-fancy';
 
 // Define a two-dimensional array similar to that shown in Figure 5 (a):
-const x = new FancyArray('float64', linspace(0, 8, 9), [3, 3], [5, 1], 0, 'row-major');
+const x = new FancyArray('float64', linspace(0, 8, 9), [3, 3], [3, 1], 0, 'row-major');
 
 // Reverse elements along each row:
 const v1 = x['::-1,:'];

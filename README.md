@@ -581,7 +581,7 @@ To mitigate adverse performance impacts, we borrowed an idea from [BLIS](https:/
 
 ### ndarrays
 
-LAPACK routines primarily operate on matrices stored in linear memory and whose elements are accessed according to specified dimensions and the stride of the leading (i.e., first) dimension. Dimensions specify the number of elements in each row and column, respectively. The stride specifies how many elements in linear memory must be skipped in order to access the first element of the next row from the first element of the previous row. LAPACK assumes that elements belonging to the same column are always contiguous (i.e., adjacent in linear memory). Figure TODO provides a visual representation of LAPACK conventions (specifically, schematics (a) and (b)).
+LAPACK routines primarily operate on matrices stored in linear memory and whose elements are accessed according to specified dimensions and the stride of the leading (i.e., first) dimension. Dimensions specify the number of elements in each row and column, respectively. The stride specifies how many elements in linear memory must be skipped in order to access the first element of the next row from the first element of the previous row. LAPACK assumes that elements belonging to the same column are always contiguous (i.e., adjacent in linear memory). Figure 4 provides a visual representation of LAPACK conventions (specifically, schematics (a) and (b)).
 
 <!-- TODO: remove the following Markdown image and keep the <figure> prior to publishing. The Markdown image is just for local development. -->
 
@@ -590,13 +590,13 @@ LAPACK routines primarily operate on matrices stored in linear memory and whose 
 <figure style="text-align:center">
 	<img src="/posts/implement-lapack-routines-in-stdlib/lapack_vs_ndarray_conventions.png" alt="Diagram illustrating the generalization of LAPACK strided array conventions to non-contiguous strided arrays" style="position:relative,left:15%,width:70%"/>
 	<figcaption>
-		Figure TODO: a) A 5-by-5 contiguous matrix stored in column-major order. b) A 3-by-3 non-contiguous sub-matrix stored in column-major order. Sub-matrices can be operated on in LAPACK by providing a pointer to the first indexed element and specifying the stride of the leading (i.e., first) dimension. In this case, the stride of leading dimension is five, even though there are only three elements per column, due to the non-contiguity of sub-matrix elements in linear memory when stored as part of a larger matrix. In LAPACK, the stride of the trailing (i.e., second) dimension is always assumed to be unity. c) A 3-by-3 non-contiguous sub-matrix stored in column-major order having non-unit strides and generalizing LAPACK stride conventions to both leading and trailing dimensions. This generalization underpins stdlib's multi-dimensional arrays (also referred to as "ndarrays").
+		Figure 4: a) A 5-by-5 contiguous matrix stored in column-major order. b) A 3-by-3 non-contiguous sub-matrix stored in column-major order. Sub-matrices can be operated on in LAPACK by providing a pointer to the first indexed element and specifying the stride of the leading (i.e., first) dimension. In this case, the stride of leading dimension is five, even though there are only three elements per column, due to the non-contiguity of sub-matrix elements in linear memory when stored as part of a larger matrix. In LAPACK, the stride of the trailing (i.e., second) dimension is always assumed to be unity. c) A 3-by-3 non-contiguous sub-matrix stored in column-major order having non-unit strides and generalizing LAPACK stride conventions to both leading and trailing dimensions. This generalization underpins stdlib's multi-dimensional arrays (also referred to as "ndarrays").
 	</figcaption>
 </figure>
 
 Libraries, such as NumPy and stdlib, generalize LAPACK's strided array conventions to support
 
-1. non-unit strides in the last dimension (see Figure TODO (c)).
+1. non-unit strides in the last dimension (see Figure 4 (c)).
 2. negative strides for any dimension. LAPACK requires that the stride of the leading dimension be positive.
 3. multi-dimensional arrays having more than two dimensions.
 
@@ -606,15 +606,15 @@ Support for non-unit strides in the last dimension ensures support for O(1) crea
 import linspace from '@stdlib/array-linspace'
 import FancyArray from '@stdlib/ndarray-fancy';
 
-// Define a two-dimensional array similar to that shown in Figure TODO (a):
+// Define a two-dimensional array similar to that shown in Figure 4 (a):
 const x = new FancyArray('float64', linspace(0, 24, 25), [5, 5], [5, 1], 0, 'row-major');
 // returns <FancyArray>
 
-// Create a sub-matrix view shown in Figure TODO (b):
+// Create a sub-matrix view shown in Figure 4 (b):
 const v1 = x['1:4,:3'];
 // returns <FancyArray>
 
-// Create a sub-matrix view shown in Figure TODO (c):
+// Create a sub-matrix view shown in Figure 4 (c):
 const v2 = x['1:4,::2'];
 // returns <FancyArray>
 
@@ -635,17 +635,17 @@ Without support for non-unit strides in the last dimension, returning a view fro
 <figure style="text-align:center">
 	<img src="/posts/implement-lapack-routines-in-stdlib/flip_and_rotate_stride_tricks.png" alt="Schematics illustrating the use of stride manipulation to create flipped and rotated views of matrix elements stored in linear memory" style="position:relative,left:15%,width:70%"/>
 	<figcaption>
-		Figure TODO: a) Given a 3-by-3 matrix stored in column-major order, one can manipulate the strides of the leading and trailing dimensions to create views in which matrix elements along one or more axes are accessed in reverse order. b) Using similar stride manipulation, one can create rotated views of matrix elements relative to their arrangement within linear memory.
+		Figure 5: a) Given a 3-by-3 matrix stored in column-major order, one can manipulate the strides of the leading and trailing dimensions to create views in which matrix elements along one or more axes are accessed in reverse order. b) Using similar stride manipulation, one can create rotated views of matrix elements relative to their arrangement within linear memory.
 	</figcaption>
 </figure>
 
-Support for negative strides enables O(1) reversal and rotation of elements along one or more dimensions (see Figure TODO). For example, to flip a matrix top-to-bottom and left-to-right, one need only negate the strides. Building on the previous code snippet, the following code snippet demonstrates reversing elements about one or more axes.
+Support for negative strides enables O(1) reversal and rotation of elements along one or more dimensions (see Figure 5). For example, to flip a matrix top-to-bottom and left-to-right, one need only negate the strides. Building on the previous code snippet, the following code snippet demonstrates reversing elements about one or more axes.
 
 ```javascript
 import linspace from '@stdlib/array-linspace'
 import FancyArray from '@stdlib/ndarray-fancy';
 
-// Define a two-dimensional array similar to that shown in Figure TODO (a):
+// Define a two-dimensional array similar to that shown in Figure 5 (a):
 const x = new FancyArray('float64', linspace(0, 8, 9), [3, 3], [5, 1], 0, 'row-major');
 
 // Reverse elements along each row:

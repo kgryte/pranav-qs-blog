@@ -596,9 +596,9 @@ LAPACK routines primarily operate on matrices stored in linear memory and whose 
 
 Libraries, such as NumPy and stdlib, generalize LAPACK's strided array conventions to support
 
-1. non-unit strides in the last dimension (see Figure 4 (c)).
+1. non-unit strides in the last dimension (see Figure 4 (c)). LAPACK assumes that the last dimension has unit stride.
 2. negative strides for any dimension. LAPACK requires that the stride of the leading dimension be positive.
-3. multi-dimensional arrays having more than two dimensions.
+3. multi-dimensional arrays having more than two dimensions. LAPACK only explicitly supports strided vectors and (sub)matrices.
 
 Support for non-unit strides in the last dimension ensures support for O(1) creation of non-contiguous views of linear memory without requiring explicit data movement. These views are often called "slices". As an example, consider the following code snippet which creates such views using APIs provided by stdlib.
 

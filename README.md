@@ -602,13 +602,13 @@ Libraries, such as NumPy and stdlib, generalize LAPACK's strided array conventio
 2. negative strides for any dimension. LAPACK requires that the stride of the leading dimension be positive.
 3. multi-dimensional arrays having more than two dimensions.
 
-Support for non-unit strides in the last dimension ensures support for O(1) creation of non-contiguous views of linear memory without requiring explicit data movement. This views are often called "slices". As an example, consider the following code snippet which creates such views using APIs provided by stdlib.
+Support for non-unit strides in the last dimension ensures support for O(1) creation of non-contiguous views of linear memory without requiring explicit data movement. These views are often called "slices". As an example, consider the following code snippet which creates such views using APIs provided by stdlib.
 
 ```javascript
 import linspace from '@stdlib/array-linspace'
 import FancyArray from '@stdlib/ndarray-fancy';
 
-// Define the two-dimensional array shown in Figure TODO (a):
+// Define a two-dimensional array similar to that shown in Figure TODO (a):
 const x = new FancyArray('float64', linspace(0, 24, 25), [5, 5], [5, 1], 0, 'row-major');
 // returns <FancyArray>
 
@@ -630,22 +630,22 @@ const b2 = ( v2.data.buffer === x.data.buffer );
 
 Without support for non-unit strides in the last dimension, returning a view from the expression `x['1:4,::2']` would not be possible, as one would need to copy selected elements to a new memory buffer in order to ensure contiguity.
 
-Support for negative strides enables O(1) reversal and rotation of elements along one or more dimensions (see Figure TODO). For example, to flip a matrix top-to-bottom and left-to-right, one need only negate the strides. Building on the previous code snippet, the following code snippet demonstrates flipping elements about one or more axes.
+Support for negative strides enables O(1) reversal and rotation of elements along one or more dimensions (see Figure TODO). For example, to flip a matrix top-to-bottom and left-to-right, one need only negate the strides. Building on the previous code snippet, the following code snippet demonstrates reversing elements about one or more axes.
 
 ```javascript
 import linspace from '@stdlib/array-linspace'
 import FancyArray from '@stdlib/ndarray-fancy';
 
-// Define the two-dimensional array shown in Figure TODO (a):
-const x = new FancyArray('float64', linspace(0, 24, 25), [5, 5], [5, 1], 0, 'row-major');
+// Define a two-dimensional array similar to that shown in Figure TODO (a):
+const x = new FancyArray('float64', linspace(0, 8, 9), [3, 3], [5, 1], 0, 'row-major');
 
-// Reverse elements along each row as shown in Figure TODO (b):
+// Reverse elements along each row:
 const v1 = x['::-1,:'];
 
-// Reverse elements along each column as shown in in Figure TODO (c):
+// Reverse elements along each column:
 const v2 = x[':,::-1'];
 
-// Reverse elements along both columns and rows as shown in in Figure TODO (d):
+// Reverse elements along both columns and rows:
 const v3 = x['::-1,::-1'];
 
 // Assert that all arrays share the same underlying memory buffer:
@@ -666,7 +666,7 @@ const b3 = ( v3.data.buffer === x.data.buffer );
 <figure style="text-align:center">
 	<img src="/posts/implement-lapack-routines-in-stdlib/flip_and_rotate_stride_tricks.png" alt="Schematics illustrating the use of stride manipulation to create flipped and rotated views of matrix elements stored in linear memory" style="position:relative,left:15%,width:70%"/>
 	<figcaption>
-		Figure TODO: a) Given a 3-by-3 matrix stored in column-major order, one can manipulate the strides of the leading and trailing dimensions to create views in which matrix elements along one or more axes are accessed in reverse order. b) Using similar stride manipulation, one can create views in which matrix elements are rotated relative storage order.
+		Figure TODO: a) Given a 3-by-3 matrix stored in column-major order, one can manipulate the strides of the leading and trailing dimensions to create views in which matrix elements along one or more axes are accessed in reverse order. b) Using similar stride manipulation, one can create rotated views of matrix elements relative to their arrangement within linear memory.
 	</figcaption>
 </figure>
 

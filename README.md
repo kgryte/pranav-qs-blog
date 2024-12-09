@@ -230,7 +230,7 @@ At least in this case, not only is the WebAssembly approach less ergonomic, but,
 ![Grouped column chart displaying a performance comparison of stdlib's C, JavaScript, and WebAssembly (Wasm) implementations for the BLAS routine daxpy for increasing array lengths.](./daxpy_wasm_comparison_benchmarks_small.png)
 
 <figure style="text-align:center">
-	<img src="/posts/implement-lapack-routines-in-stdlib/daxpy_wasm_comparison_benchmarks_small.png" alt="Grouped column chart displaying a performance comparison of stdlib's C, JavaScript, and WebAssembly (Wasm) implementations for the BLAS routine daxpy for increasing array lengths." style="position:relative,left:15%,width:70%,height:50%"/>
+	<img src="/posts/implement-lapack-routines-in-stdlib/daxpy_wasm_comparison_benchmarks_small.png" alt="Grouped column chart displaying a performance comparison of stdlib's C, JavaScript, and WebAssembly (Wasm) implementations for the BLAS routine daxpy for increasing array lengths." style="position:relative,left:15%,width:70%"/>
 	<figcaption>
 		Figure 1: Performance comparison of stdlib's C, JavaScript, and WebAssembly (Wasm) implementations for the BLAS routine <i>daxpy</i> for increasing array lengths (x-axis). In the <i>Wasm (copy)</i> benchmark, input and output data is copied to and from Wasm memory, leading to poorer performance.
 	</figcaption>
@@ -455,7 +455,7 @@ When storing matrix elements in linear memory, one has two choices: either store
 ![Schematic demonstrating storing matrix elements in linear memory in either column-major or row-major order](./row_vs_column_major.png)
 
 <figure style="text-align:center">
-	<img src="/posts/implement-lapack-routines-in-stdlib/row_vs_column_major.png" alt="Schematic demonstrating storing matrix elements in linear memory in either column-major or row-major order" style="position:relative,left:15%,width:70%,height:50%"/>
+	<img src="/posts/implement-lapack-routines-in-stdlib/row_vs_column_major.png" alt="Schematic demonstrating storing matrix elements in linear memory in either column-major or row-major order" style="position:relative,left:15%,width:70%"/>
 	<figcaption>
 		Figure 2: Schematic demonstrating storing matrix elements in linear memory in either (a) column-major (Fortran-style) or (b) row-major (C-style) order. The choice of which layout to use is largely a matter of convention.
 	</figcaption>
@@ -569,7 +569,7 @@ TODO: insert chart
 ![Performance comparison of copying matrices stored in either row- or column-major order when the underlying algorithm assumes column-major order](./row_vs_column_major.png)
 
 <figure style="text-align:center">
-	<img src="/posts/implement-lapack-routines-in-stdlib/row_vs_column_major.png" alt="Performance comparison of copying matrices stored in either row- or column-major order when the underlying algorithm assumes column-major order" style="position:relative,left:15%,width:70%,height:50%"/>
+	<img src="/posts/implement-lapack-routines-in-stdlib/row_vs_column_major.png" alt="Performance comparison of copying matrices stored in either row- or column-major order when the underlying algorithm assumes column-major order" style="position:relative,left:15%,width:70%"/>
 	<figcaption>
 		Figure 3: TODO: add caption
 	</figcaption>
@@ -590,7 +590,7 @@ LAPACK routines primarily operate on matrices stored in linear memory and whose 
 ![Diagram illustrating the generalization of LAPACK strided array conventions to non-contiguous strided arrays](./lapack_vs_ndarray_conventions.png)
 
 <figure style="text-align:center">
-	<img src="/posts/implement-lapack-routines-in-stdlib/lapack_vs_ndarray_conventions.png" alt="Diagram illustrating the generalization of LAPACK strided array conventions to non-contiguous strided arrays" style="position:relative,left:15%,width:70%,height:50%"/>
+	<img src="/posts/implement-lapack-routines-in-stdlib/lapack_vs_ndarray_conventions.png" alt="Diagram illustrating the generalization of LAPACK strided array conventions to non-contiguous strided arrays" style="position:relative,left:15%,width:70%"/>
 	<figcaption>
 		Figure TODO: a) A 5-by-5 contiguous matrix stored in column-major order. b) A 3-by-3 non-contiguous sub-matrix stored in column-major order. Sub-matrices can be operated on in LAPACK by providing a pointer to the first indexed element and specifying the stride of the leading (i.e., first) dimension. In this case, the stride of leading dimension is five, even though there are only three elements per column, due to the non-contiguity of sub-matrix elements in linear memory when stored as part of a larger matrix. In LAPACK, the stride of the trailing (i.e., second) dimension is always assumed to be unity. c) A 3-by-3 non-contiguous sub-matrix stored in column-major order having non-unit strides and generalizing LAPACK stride conventions to both leading and trailing dimensions. This generalization underpins stdlib's multi-dimensional arrays (also referred to as "ndarrays").
 	</figcaption>
@@ -664,7 +664,7 @@ const b3 = ( v3.data.buffer === x.data.buffer );
 ![Schematics illustrating the use of stride manipulation to create flipped and rotated views of matrix elements stored in linear memory](./flip_and_rotate_stride_tricks.png)
 
 <figure style="text-align:center">
-	<img src="/posts/implement-lapack-routines-in-stdlib/flip_and_rotate_stride_tricks.png" alt="Schematics illustrating the use of stride manipulation to create flipped and rotated views of matrix elements stored in linear memory" style="position:relative,left:15%,width:70%,height:50%"/>
+	<img src="/posts/implement-lapack-routines-in-stdlib/flip_and_rotate_stride_tricks.png" alt="Schematics illustrating the use of stride manipulation to create flipped and rotated views of matrix elements stored in linear memory" style="position:relative,left:15%,width:70%"/>
 	<figcaption>
 		Figure TODO: a) Given a 3-by-3 matrix stored in column-major order, one can manipulate the strides of the leading and trailing dimensions to create views in which matrix elements along one or more axes are accessed in reverse order. b) Using similar stride manipulation, one can create views in which matrix elements are rotated relative storage order.
 	</figcaption>

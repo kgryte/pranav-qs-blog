@@ -566,10 +566,10 @@ TODO: insert chart
 
 <!-- TODO: remove the following Markdown image and keep the <figure> prior to publishing. The Markdown image is just for local development. -->
 
-![Performance comparison of copying matrices stored in either row- or column-major order when the underlying algorithm assumes column-major order](./row_vs_column_major.png)
+![Performance comparison of copying matrices stored in either row- or column-major order when the underlying algorithm assumes column-major order](./dlacpy_row_vs_column_major_comparison_benchmarks_small.png)
 
 <figure style="text-align:center">
-	<img src="/posts/implement-lapack-routines-in-stdlib/row_vs_column_major.png" alt="Performance comparison of copying matrices stored in either row- or column-major order when the underlying algorithm assumes column-major order" style="position:relative,left:15%,width:70%"/>
+	<img src="/posts/implement-lapack-routines-in-stdlib/dlacpy_row_vs_column_major_comparison_benchmarks_small.png" alt="Performance comparison of copying matrices stored in either row- or column-major order when the underlying algorithm assumes column-major order" style="position:relative,left:15%,width:70%"/>
 	<figcaption>
 		Figure 3: TODO: add caption
 	</figcaption>

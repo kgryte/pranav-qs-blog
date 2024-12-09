@@ -1,0 +1,154 @@
+TAP version 13
+# square::order=column-major,shape=[10,10],size=100
+  ---
+  iterations: 1000000
+  elapsed: 0.119461333
+  rate: 8370909.438956285
+  ...
+ok 1 benchmark finished
+# square::order=column-major,shape=[10,10],size=100
+  ---
+  iterations: 1000000
+  elapsed: 0.120049625
+  rate: 8329888.577327918
+  ...
+ok 2 benchmark finished
+# square::order=column-major,shape=[10,10],size=100
+  ---
+  iterations: 1000000
+  elapsed: 0.120141584
+  rate: 8323512.698151208
+  ...
+ok 3 benchmark finished
+# square::order=column-major,shape=[31,31],size=961
+  ---
+  iterations: 1000000
+  elapsed: 0.956267834
+  rate: 1045732.1311510307
+  ...
+ok 4 benchmark finished
+# square::order=column-major,shape=[31,31],size=961
+  ---
+  iterations: 1000000
+  elapsed: 0.960800958
+  rate: 1040798.2961232642
+  ...
+ok 5 benchmark finished
+# square::order=column-major,shape=[31,31],size=961
+  ---
+  iterations: 1000000
+  elapsed: 0.967569125
+  rate: 1033517.8894841234
+  ...
+ok 6 benchmark finished
+# square::order=column-major,shape=[100,100],size=10000
+  ---
+  iterations: 100000
+  elapsed: 0.963510416
+  rate: 103787.14992532058
+  ...
+ok 7 benchmark finished
+# square::order=column-major,shape=[100,100],size=10000
+  ---
+  iterations: 100000
+  elapsed: 0.9694135
+  rate: 103155.15515308999
+  ...
+ok 8 benchmark finished
+# square::order=column-major,shape=[100,100],size=10000
+  ---
+  iterations: 100000
+  elapsed: 0.968496125
+  rate: 103252.8653638134
+  ...
+ok 9 benchmark finished
+# square::order=column-major,shape=[316,316],size=99856
+  ---
+  iterations: 10000
+  elapsed: 0.964929125
+  rate: 10363.455450678824
+  ...
+ok 10 benchmark finished
+# square::order=column-major,shape=[316,316],size=99856
+  ---
+  iterations: 10000
+  elapsed: 0.956546417
+  rate: 10454.27573850815
+  ...
+ok 11 benchmark finished
+# square::order=column-major,shape=[316,316],size=99856
+  ---
+  iterations: 10000
+  elapsed: 0.964230625
+  rate: 10370.962859637444
+  ...
+ok 12 benchmark finished
+# square::order=column-major,shape=[1000,1000],size=1000000
+  ---
+  iterations: 1000
+  elapsed: 0.956370667
+  rate: 1045.6196896302342
+  ...
+ok 13 benchmark finished
+# square::order=column-major,shape=[1000,1000],size=1000000
+  ---
+  iterations: 1000
+  elapsed: 0.953889
+  rate: 1048.3400060174718
+  ...
+ok 14 benchmark finished
+# square::order=column-major,shape=[1000,1000],size=1000000
+  ---
+  iterations: 1000
+  elapsed: 0.956724458
+  rate: 1045.2330257036242
+  ...
+ok 15 benchmark finished
+# square::order=column-major,shape=[3162,3162],size=9998244
+  ---
+  iterations: 100
+  elapsed: 0.946531334
+  rate: 105.64890607203078
+  ...
+ok 16 benchmark finished
+# square::order=column-major,shape=[3162,3162],size=9998244
+  ---
+  iterations: 100
+  elapsed: 0.958550208
+  rate: 104.32421709933007
+  ...
+ok 17 benchmark finished
+# square::order=column-major,shape=[3162,3162],size=9998244
+  ---
+  iterations: 100
+  elapsed: 0.955500875
+  rate: 104.65715167450789
+  ...
+ok 18 benchmark finished
+# square::order=column-major,shape=[10000,10000],size=100000000
+  ---
+  iterations: 10
+  elapsed: 0.958889083
+  rate: 10.428734852954834
+  ...
+ok 19 benchmark finished
+# square::order=column-major,shape=[10000,10000],size=100000000
+  ---
+  iterations: 10
+  elapsed: 0.951980209
+  rate: 10.504420055648447
+  ...
+ok 20 benchmark finished
+# square::order=column-major,shape=[10000,10000],size=100000000
+  ---
+  iterations: 10
+  elapsed: 0.951807542
+  rate: 10.506325658007867
+  ...
+ok 21 benchmark finished
+#
+1..21
+# total 21
+# pass  21
+#
+# ok

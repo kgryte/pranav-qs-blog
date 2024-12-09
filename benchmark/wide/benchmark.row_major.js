@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
 * @license Apache-2.0
 *
@@ -26,16 +28,15 @@ var isnan = require( '@stdlib/math/base/assert/is-nan' );
 var pow = require( '@stdlib/math/base/special/pow' );
 var floor = require( '@stdlib/math/base/special/floor' );
 var shape2strides = require( '@stdlib/ndarray/base/shape2strides' );
+var strides2offset = require( '@stdlib/ndarray/base/strides2offset' );
 var numel = require( '@stdlib/ndarray/base/numel' );
 var format = require( '@stdlib/string/format' );
-var pkg = require( './../package.json' ).name;
 
 
 // VARIABLES //
 
 var orders = [
-	'row-major',
-	'column-major'
+	'row-major'
 ];
 
 
@@ -103,20 +104,47 @@ function dlacpy( M, N, A, strideA1, strideA2, offsetA, B, strideB1, strideB2, of
 */
 function createBenchmark( shape, order ) {
 	var opts;
+	var sa1;
+	var sb1;
 	var sa;
 	var sb;
+	var oa;
+	var ob;
 	var A;
 	var B;
+	var N;
 
 	opts = {
 		'dtype': 'float64'
 	};
 
-	A = uniform( numel( shape ), -10.0, 10.0, opts );
-	B = uniform( numel( shape ), -10.0, 10.0, opts );
+	N = numel( shape );
+	A = [
+		uniform( N, -10.0, 10.0, opts ),
+		uniform( N, -10.0, 10.0, opts ),
+		uniform( N, -10.0, 10.0, opts )
+	];
+	B = uniform( N, -10.0, 10.0, opts );
 
-	sa = shape2strides( shape, order );
-	sb = shape2strides( shape, order );
+	sa1 = shape2strides( shape, order );
+	sb1 = shape2strides( shape, order );
+
+	sa = [
+		sa1,
+		[ -sa1[0], -sa1[1] ]
+	];
+	sb = [
+		sb1,
+		[ -sb1[0], -sb1[1] ]
+	];
+	oa = [
+		strides2offset( shape, sa[0] ),
+		strides2offset( shape, sa[1] )
+	];
+	ob = [
+		strides2offset( shape, sb[0] ),
+		strides2offset( shape, sb[1] )
+	];
 
 	return benchmark;
 
@@ -127,18 +155,31 @@ function createBenchmark( shape, order ) {
 	* @param {Benchmark} b - benchmark instance
 	*/
 	function benchmark( b ) {
+		var sx;
+		var sy;
+		var ox;
+		var oy;
+		var x;
+		var y;
 		var z;
 		var i;
 
+		y = B;
+
 		b.tic();
 		for ( i = 0; i < b.iterations; i++ ) {
-			z = dlacpy( shape[0], shape[1], A, sa[0], sa[1], 0, B, sb[0], sb[1], 0 ); // eslint-disable-line max-len
-			if ( isnan( z[ i%z.length ] ) ) {
+			x = A[ i%A.length ];
+			sx = sa[ i%sa.length ];
+			ox = oa[ i%oa.length ];
+			sy = sb[ i%sb.length ];
+			oy = ob[ i%ob.length ];
+			z = dlacpy( shape[0], shape[1], x, sx[0], sx[1], ox, y, sy[0], sy[1], oy ); // eslint-disable-line max-len
+			if ( isnan( z[ i%N ] ) ) {
 				b.fail( 'should not return NaN' );
 			}
 		}
 		b.toc();
-		if ( isnan( z[ i%z.length ] ) ) {
+		if ( isnan( z[ i%N ] ) ) {
 			b.fail( 'should not return NaN' );
 		}
 		b.pass( 'benchmark finished' );
@@ -167,26 +208,11 @@ function main() {
 	max = 8; // 10^max
 
 	for ( j = 0; j < orders.length; j++ ) {
-		// Square matrices...
-		for ( i = min; i <= max; i++ ) {
-			N = floor( pow( pow( 10, i ), 1.0/2.0 ) );
-			sh = [ N, N ];
-			f = createBenchmark( sh, orders[ j ] );
-			bench( format( '%s:order=%s,shape=[%s],size=%d', pkg, orders[ j ], sh.join( ',' ), numel( sh ) ), f );
-		}
-		// Tall matrices...
-		for ( i = min; i <= max; i++ ) {
-			N = floor( pow( 10, i ) / 5.0 );
-			sh = [ N, 5 ];
-			f = createBenchmark( sh, orders[ j ] );
-			bench( format( '%s:order=%s,shape=[%s],size=%d', pkg, orders[ j ], sh.join( ',' ), numel( sh ) ), f );
-		}
-		// Wide matrices...
 		for ( i = min; i <= max; i++ ) {
 			N = floor( pow( 10, i ) / 5.0 );
 			sh = [ 5, N ];
 			f = createBenchmark( sh, orders[ j ] );
-			bench( format( '%s:order=%s,shape=[%s],size=%d', pkg, orders[ j ], sh.join( ',' ), numel( sh ) ), f );
+			bench( format( 'wide::order=%s,shape=[%s],size=%d', orders[ j ], sh.join( ',' ), numel( sh ) ), f );
 		}
 	}
 }

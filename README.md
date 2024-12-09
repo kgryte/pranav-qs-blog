@@ -596,7 +596,7 @@ LAPACK routines primarily operate on matrices stored in linear memory and whose 
 
 Libraries, such as NumPy and stdlib, generalize LAPACK's strided array conventions to support
 
-1. non-unit strides in the last dimension (see Figure 4 (c)). LAPACK assumes that the last dimension has unit stride.
+1. non-unit strides in the last dimension (see Figure 4 (c)). LAPACK assumes that the last dimension of a matrix always has unit stride.
 2. negative strides for any dimension. LAPACK requires that the stride of the leading dimension be positive.
 3. multi-dimensional arrays having more than two dimensions. LAPACK only explicitly supports strided vectors and (sub)matrices.
 
@@ -610,11 +610,11 @@ import FancyArray from '@stdlib/ndarray-fancy';
 const x = new FancyArray('float64', linspace(0, 24, 25), [5, 5], [5, 1], 0, 'row-major');
 // returns <FancyArray>
 
-// Create a sub-matrix view shown in Figure 4 (b):
+// Create a sub-matrix view similar to that shown in Figure 4 (b):
 const v1 = x['1:4,:3'];
 // returns <FancyArray>
 
-// Create a sub-matrix view shown in Figure 4 (c):
+// Create a sub-matrix view similar to that shown in Figure 4 (c):
 const v2 = x['::2,::2'];
 // returns <FancyArray>
 
@@ -626,7 +626,7 @@ const b2 = ( v2.data.buffer === x.data.buffer );
 // returns true
 ```
 
-Without support for non-unit strides in the last dimension, returning a view from the expression `x['::2,::2']` would not be possible, as one would need to copy selected elements to a new memory buffer in order to ensure contiguity.
+Without support for non-unit strides in the last dimension, returning a view from the expression `x['::2,::2']` would not be possible, as one would need to copy selected elements to a new linear memory buffer in order to ensure contiguity.
 
 <!-- TODO: remove the following Markdown image and keep the <figure> prior to publishing. The Markdown image is just for local development. -->
 

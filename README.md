@@ -659,6 +659,17 @@ const b3 = ( v3.data.buffer === x.data.buffer );
 // returns true
 ```
 
+<!-- TODO: remove the following Markdown image and keep the <figure> prior to publishing. The Markdown image is just for local development. -->
+
+![Schematics illustrating the use of stride manipulation to create flipped and rotated views of matrix elements stored in linear memory](./flip_and_rotate_stride_tricks.png)
+
+<figure style="text-align:center">
+	<img src="/posts/implement-lapack-routines-in-stdlib/flip_and_rotate_stride_tricks.png" alt="Schematics illustrating the use of stride manipulation to create flipped and rotated views of matrix elements stored in linear memory" style="position:relative,left:15%,width:70%,height:50%"/>
+	<figcaption>
+		Figure TODO: a) Given a 3-by-3 matrix stored in column-major order, one can manipulate the strides of the leading and trailing dimensions to create views in which matrix elements along one or more axes are accessed in reverse order. b) Using similar stride manipulation, one can create views in which matrix elements are rotated relative storage order.
+	</figcaption>
+</figure>
+
 TODO: scope creep and increasing ambition.
 
 Previewed in the discussion of memory layouts, need an offset parameter. LAPACK assumes that matrix data is stored in a single block of memory and only allows specifying the stride of the leading dimension of a matrix. While this allows operating on sub-matrices, it does not allow supporting matrices stored in non-contiguous memory. For non-contiguous multi-dimensional data, libraries, such as NumPy, must copy matrices to temporary buffers in order to ensure contiguous memory before calling into LAPACK. This additional data movement is not ideal, and so we sought to generalize BLIS-style APIs by including offset parameters. As JavaScript does not have an explicit concept of memory addresses and thus pointers in the manner of C, support for offset parameters allows us to avoid temporary typed array view creation by simply specifying the index of the first indexed element.

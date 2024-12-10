@@ -686,7 +686,7 @@ if (stride < 0) {
 }
 ```
 
-where `M` is the number of vector elements. This implicitly assumes that a provided data pointer points to the beginning of linear memory for a vector. In languages supporting pointers, such as C and Fortran, in order to operate on a different region of linear memory, one typically adjusts a pointer using pointer arithmetic prior to function invocation, which is relatively cheap and straightforward, at least for the one-dimensional case.
+where `M` is the number of vector elements. This implicitly assumes that a provided data pointer points to the beginning of linear memory for a vector. In languages supporting pointers, such as C, in order to operate on a different region of linear memory, one typically adjusts a pointer using pointer arithmetic prior to function invocation, which is relatively cheap and straightforward, at least for the one-dimensional case.
 
 For example, returning to `c_daxpy` as defined above, we can use pointer arithmetic to limit element access to five elements within linear memory beginning at the eleventh and sixteenth elements (note: zero-based indexing) of an input and output array, respectively, as shown in the following code snippet.
 
@@ -833,7 +833,7 @@ const v2 = y['1::2,2'];
 daxpy_ndarray(v1.length, 5.0, v1.data, v1.strides[0], v1.offset, v2.data, v2.strides[0], v2.offset);
 ```
 
-Similar to BLIS, we saw value in both conventional LAPACK API signatures (e.g., for backward compatibility) and modified API signatures (e.g., for minimizing adverse performance impacts), and thus, we settled on a plan to provide conventional and modified APIs for each LAPACK routine. To minimize code duplication, we aimed to implement a common lower-level "base" implementation which could then be wrapped by the higher-level APIs. While the changes for the BLAS routine `daxpy` shown above may appear relatively straightforward, for LAPACK APIs, the mapping of the conventional LAPACK routine and its expected behavior to a generalized implementation was often much less so.
+Similar to BLIS, we saw value in both conventional LAPACK API signatures (e.g., for backward compatibility) and modified API signatures (e.g., for minimizing adverse performance impacts), and thus, we settled on a plan to provide both conventional and modified APIs for each LAPACK routine. To minimize code duplication, we aimed to implement a common lower-level "base" implementation which could then be wrapped by higher-level APIs. While the changes for the BLAS routine `daxpy` shown above may appear relatively straightforward, the transformation of a conventional LAPACK routine and its expected behavior to a generalized implementation was often much less so.
 
 ## dlaswp
 

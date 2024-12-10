@@ -1137,7 +1137,7 @@ A few points to note:
 2. In contrast to the conventional LAPACKE API, when an input matrix is row-major, we don't need to copy data to temporary workspace arrays, thus reducing unnecessary memory allocation.
 3. In contrast to libraries, such as NumPy and SciPy, which interface with BLAS and LAPACK directly, when calling LAPACK routines in stdlib, we don't need to copy non-contiguous multi-dimensional data to and from temporary workspace arrays before and after invocation, respectively. Except when interfacing with hardware-optimized BLAS and LAPACK, the approach pursued during this internship helps minimize data movement and ensures performance in resource constrained browser applications.
 
-For server-side applications hoping to leverage hardware-optimized libraries, such as OpenBLAS, we provide separate wrappers which adapt generalized signature arguments to their optimized API equivalents. In this context, creating temporary copies can be worth the overhead, at least for sufficiently large arrays.
+For server-side applications hoping to leverage hardware-optimized libraries, such as OpenBLAS, we provide separate wrappers which adapt generalized signature arguments to their optimized API equivalents. In this context, at least for sufficiently large arrays, creating temporary copies can be worth the overhead.
 
 ## Current status and next steps
 

@@ -14,7 +14,7 @@ To take NumPy as an example, NumPy is a single monolithic library, where all of 
 
 Given the unique constraints of web application development, stdlib takes a bottom-up approach to its design, where every unit of functionality can be installed and consumed independent of unrelated and unused parts of the codebase. By embracing a decomposable software architecture and [radical modularity](https://aredridel.dinhe.net/2016/06/04/radical-modularity/), stdlib offers users the ability to install and use exactly what they need, with little-to-no excess code beyond a desired set of APIs and their explicit dependencies, thus ensuring smaller memory footprints, bundle sizes, and faster deployment.
 
-As an example, suppose you are working with two stacks of matrices (i.e., two-dimensional slices of three-dimensional cubes), and you want to select every other slice and perform the common BLAS operation `y += a*x`, where `x` and `y` are [`ndarrays`](https://stdlib.io/docs/api/latest/@stdlib/ndarray/ctor) and `a` is a scalar constant. To do this with NumPy, you'd first install all of NumPy
+As an example, suppose you are working with two stacks of matrices (i.e., two-dimensional slices of three-dimensional cubes), and you want to select every other slice and perform the common BLAS operation `y += a * x`, where `x` and `y` are [`ndarrays`](https://stdlib.io/docs/api/latest/@stdlib/ndarray/ctor) and `a` is a scalar constant. To do this with NumPy, you'd first install all of NumPy
 
 ```bash
 pip install numpy

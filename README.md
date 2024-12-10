@@ -686,7 +686,9 @@ if (stride < 0) {
 }
 ```
 
-where `M` is the number of vector elements. This implicitly assumes that a provided data pointer points to the beginning of linear memory for a vector. In languages supporting pointers, such as C and Fortran, in order to operate on a different region of linear memory, one typically adjusts a pointer using pointer arithmetic prior to function invocation, which is relatively cheap and straightforward, at least for the one-dimensional case. For example, returning to `c_daxpy` as defined above, we can use pointer arithmetic to limit element access to five elements within linear memory beginning at the eleventh and sixteenth (note: zero-based indexing) elements of an input and output array, respectively, as shown in the following code snippet.
+where `M` is the number of vector elements. This implicitly assumes that a provided data pointer points to the beginning of linear memory for a vector. In languages supporting pointers, such as C and Fortran, in order to operate on a different region of linear memory, one typically adjusts a pointer using pointer arithmetic prior to function invocation, which is relatively cheap and straightforward, at least for the one-dimensional case.
+
+For example, returning to `c_daxpy` as defined above, we can use pointer arithmetic to limit element access to five elements within linear memory beginning at the eleventh and sixteenth elements (note: zero-based indexing) of an input and output array, respectively, as shown in the following code snippet.
 
 ```c
 // Define the number of bytes per element:
@@ -732,7 +734,7 @@ const y = new Float64Array([...]);
 daxpy(5, 5.0, offsetView(x, 10), 1, offsetView(y, 15), 1);
 ```
 
-While, for large array sizes, the cost of typed array instantiation is negligible compared to the time spent accessing and operating on individual array elements, for smaller array sizes, object instantiation can significantly impact performance.
+For large array sizes, the cost of typed array instantiation is negligible compared to the time spent accessing and operating on individual array elements; however, for smaller array sizes, object instantiation can significantly impact performance.
 
 Accordingly, in order to avoid adverse object instantiation performance impacts, stdlib decouples an ndarray's data buffer from the location of the buffer element corresponding to the beginning of an [ndarray view](https://github.com/stdlib-js/stdlib/tree/1c56b737ec018cc818cebf19e5c7947fa684e126/lib/node_modules/%40stdlib/ndarray/base/min-view-buffer-index). This allows the slice expressions `x[2:,3:]` and `x[3:,1:]` to return new ndarray views **without** needing to instantiate new buffer instances, as demonstrated in the following code snippet.
 
@@ -753,7 +755,9 @@ const b2 = ( v2.data === x.data );
 // returns true
 ```
 
-As a consequence of decoupling a data buffer from the beginning of an ndarray view, we similarly sought to avoid having to instantiate new typed array instances when calling into LAPACK routines with ndarray data. This meant creating modified LAPACK API signatures supporting explicit offset parameters for all strided vectors and matrices. For simplicity, let's return to the JavaScript implementation of `daxpy`, which was previously defined above.
+As a consequence of decoupling a data buffer from the beginning of an ndarray view, we similarly sought to avoid having to instantiate new typed array instances when calling into LAPACK routines with ndarray data. This meant creating modified LAPACK API signatures supporting explicit offset parameters for all strided vectors and matrices.
+
+For simplicity, let's return to the JavaScript implementation of `daxpy`, which was previously defined above.
 
 ```javascript
 function daxpy(N, alpha, X, strideX, Y, strideY) {
@@ -785,7 +789,7 @@ function daxpy(N, alpha, X, strideX, Y, strideY) {
 }
 ```
 
-We can modify the above signature and implementation, as demonstrated in the following code snippet, in order to shift resolution of the first indexed element to the API consumer.
+As demonstrated in the following code snippet, we can modify the above signature and implementation such that the responsibility for resolving the first indexed element is shifted to the API consumer.
 
 ```javascript
 function daxpy_ndarray(N, alpha, X, strideX, offsetX, Y, strideY, offsetY) {

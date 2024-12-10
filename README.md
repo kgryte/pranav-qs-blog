@@ -433,7 +433,7 @@ subroutine dlacpy( uplo, M, N, A, LDA, B, LDB )
 end subroutine dlacpy
 ```
 
-As may be observed, by removing column restrictions and moving away from the F77 convention of specifiers in ALL CAPS, modern Fortran code is more visibly consistent and thus more readable.
+As may be observed, by removing column restrictions and moving away from the F77 convention of writing specifiers in ALL CAPS, modern Fortran code is more visibly consistent and thus more readable.
 
 #### Labeled control structures
 

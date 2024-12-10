@@ -691,23 +691,16 @@ where `M` is the number of vector elements. This implicitly assumes that a provi
 For example, returning to `c_daxpy` as defined above, we can use pointer arithmetic to limit element access to five elements within linear memory beginning at the eleventh and sixteenth elements (note: zero-based indexing) of an input and output array, respectively, as shown in the following code snippet.
 
 ```c
-// Define the number of bytes per element:
-const int bytes_per_element = 8; // 8 bytes per double
-
-// ...
-
 // Define data arrays:
 const double *X = {...};
 double *Y = {...};
-
-// ...
 
 // Specify the indices of the elements which begin a desired memory region:
 const xoffset = 10;
 const yoffset = 15; 
 
 // Limit the operation to only elements within the desired memory region:
-c_daxpy(5, 5.0, X+(bytes_per_element*xoffset), 1, Y+(bytes_per_element*yoffset), 1);
+c_daxpy(5, 5.0, X+xoffset, 1, Y+yoffset, 1);
 ```
 
 However, in JavaScript, which does not support explicit pointer arithmetic for binary buffers, one must [explicitly instantiate](https://github.com/stdlib-js/stdlib/tree/1c56b737ec018cc818cebf19e5c7947fa684e126/lib/node_modules/%40stdlib/strided/base/offset-view) new typed array objects having a desired [byte offset](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray#parameters). In the following code snippet, in order to achieve the same results as the C example above, we must resolve a typed array constructor, compute a new byte offset, compute a new typed array length, and create a new typed array instance.

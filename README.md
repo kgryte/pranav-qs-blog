@@ -676,7 +676,7 @@ $$
 
 where _N_ is the number of array dimensions and _s<sub>k</sub>_ corresponds to <i>k</i>th stride.
 
-In BLAS and LAPACK routines supporting negative strides—something which is exclusively when operating on strided vectors (e.g., see `daxpy` above)—the index offset is computed using logic similar to the following code snippet:
+In BLAS and LAPACK routines supporting negative strides—something which is only supported when operating on strided vectors (e.g., see `daxpy` above)—the index offset is computed using logic similar to the following code snippet:
 
 ```c
 if (stride < 0) {

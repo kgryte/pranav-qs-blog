@@ -433,6 +433,8 @@ subroutine dlacpy( uplo, M, N, A, LDA, B, LDB )
 end subroutine dlacpy
 ```
 
+As may be observed, by removing column restrictions and moving away from the F77 convention of specifiers in ALL CAPS, modern Fortran code is more visibly consistent and thus more readable.
+
 #### Labeled control structures
 
 Another common practice in LAPACK routines is the use of labeled control structures. For example, consider the following code snippet in which the label `10` must match a corresponding `CONTINUE`.
@@ -443,7 +445,7 @@ Another common practice in LAPACK routines is the use of labeled control structu
    10 CONTINUE
 ```
 
-Fortran 90 obviated the need for this practice, allowing one to use `end do` to end a `do` loop, as used in the free form version of `dlacpy` shown above.
+Fortran 90 obviated the need for this practice and improved code readability by allowing one to use `end do` to end a `do` loop. This change is shown in the free form version of `dlacpy` provided above.
 
 #### Assumed-size arrays
 

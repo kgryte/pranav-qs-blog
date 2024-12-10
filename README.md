@@ -668,13 +668,13 @@ const b3 = ( v3.data.buffer === x.data.buffer );
 // returns true
 ```
 
-Implicit in the discussion of negative strides is the need for an "offset" parameter which indicates the index of the first indexed element in linear memory. For a strided multi-dimensional array _A_ and a list of strides _s_, the index corresponding to element _A<sub>ij</sub>_ can be resolved according to the equation
+Implicit in the discussion of negative strides is the need for an "offset" parameter which indicates the index of the first indexed element in linear memory. For a strided multi-dimensional array _A_ and a list of strides _s_, the index corresponding to element _A<sub>ij⋅⋅⋅n</sub>_ can be resolved according to the equation
 
 $$
-\textrm{idx} = \textrm{offset} + \sum_{i=0}^{N-1} i \cdot s\[i\]
+\textrm{idx} = \textrm{offset} + i \cdot s_0 + j \cdot s_1 + \ldots + n \cdot s_{N-1}
 $$
 
-where _N_ is the number of array dimensions.
+where _N_ is the number of array dimensions and _s<sub>k</sub>_ corresponds to <i>k</i>th stride.
 
 In BLAS and LAPACK routines supporting negative strides, which is exclusively when operating on strided vectors (e.g., see `daxpy` above), the index offset is computed using logic similar to the following code snippet:
 

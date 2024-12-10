@@ -455,7 +455,7 @@ One consequence of using assumed-size arrays is that compilers are unable to per
 
 #### Migrating to Fortran 95
 
-Needless to say, it took me a while to adjust to LAPACK conventions and adopt an LAPACK mindset. However, being something of a purist, if I was going to be porting over routines anyway, I at least wanted to bring those routines I did manage to port into a more modern age in hopes of improving code readability and future maintenance. So, after discussing things with stdlib maintainers, I settled on migrating routines to Fortran 95, which, while not the latest and greatest Fortran version, seemed to strike the right balance between maintaining the look-and-feel of the original implementations, backward compatibility, and taking advantage of newer syntactical features.
+Needless to say, it took me a while to adjust to LAPACK conventions and adopt an LAPACK mindset. However, being something of a purist, if I was going to be porting over routines anyway, I at least wanted to bring those routines I did manage to port into a more modern age in hopes of improving code readability and future maintenance. So, after discussing things with stdlib maintainers, I settled on migrating routines to Fortran 95, which, while not the latest and greatest Fortran version, seemed to strike the right balance between maintaining the look-and-feel of the original implementations, ensuring (good enough) backward compatibility, and taking advantage of newer syntactical features.
 
 ### Test Coverage
 

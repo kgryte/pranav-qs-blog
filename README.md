@@ -449,7 +449,7 @@ Fortran 90 obviated the need for this practice and improved code readability by 
 
 #### Assumed-size arrays
 
-To allow flexibility in handling arrays of varying sizes, LAPACK routines commonly operate on arrays having an assumed-size. In the `dlacpy` routine above, the input matrix `A` is declared to be a two-dimensional array having an assumed-size: `A(LDA, *)`. The expression `A(LDA, *)` indicates that `A` has `LDA` number of rows and uses `*` as a placeholder indicating that the size of the second dimension is determined by the calling program.
+To allow flexibility in handling arrays of varying sizes, LAPACK routines commonly operate on arrays having an assumed-size. In the `dlacpy` routine above, the input matrix `A` is declared to be a two-dimensional array having an assumed-size according to the expression `A(LDA, *)`. This expression declares that `A` has `LDA` number of rows and uses `*` as a placeholder to indicate that the size of the second dimension is determined by the calling program.
 
 One consequence of using assumed-size arrays is that compilers are unable to perform bounds checking on the unspecified dimension. Thus, [current best practice](https://fortran-lang.discourse.group/t/matrix-index-pointer-confusion/8453/5) is to use explicit interfaces and assumed-shape arrays (e.g., `A(LDA,:)`) in order to prevent out-of-bounds memory access. However, the use of assumed-shape arrays can be problematic when needing to pass sub-matrices to other functions, as doing so requires slicing which often results in compilers creating internal copies of array data.
 

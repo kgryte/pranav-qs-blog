@@ -692,8 +692,8 @@ For example, returning to `c_daxpy` as defined above, we can use pointer arithme
 
 ```c
 // Define data arrays:
-const double *X = {...};
-double *Y = {...};
+const double X[] = {...};
+double Y[] = {...};
 
 // Specify the indices of the elements which begin a desired memory region:
 const xoffset = 10;

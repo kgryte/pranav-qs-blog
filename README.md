@@ -34,7 +34,7 @@ y = np.asarray(...)
 y[::2,:,:] += 5.0 * x[::2,:,:]
 ```
 
-With stdlib, in addition to installing as a monolithic library, you can install the various units of functionality as separate packages
+With stdlib, in addition to having the ability to install the project as a monolithic library, you can install the various units of functionality as separate packages
 
 ```bash
 npm install @stdlib/ndarray-fancy @stdlib/blas-daxpy

@@ -319,124 +319,141 @@ With my plan in hand, I was excited to get to work. For my first routine, I chos
 
 ### Legacy Fortran
 
-Prior to my internship, I was (and still am!) a regular contributor to [LFortran](https://lfortran.org), a modern interactive Fortran compiler built on top of LLVM, and I was feeling fairly confident in my Fortran skills. However, one of my first challenges was simply understanding legacy Fortran code. Let's illustrate this with an example.
+Prior to my internship, I was (and still am!) a regular contributor to [LFortran](https://lfortran.org), a modern interactive Fortran compiler built on top of LLVM, and I was feeling fairly confident in my Fortran skills. However, one of my first challenges was simply understanding what is now considered ["legacy" Fortran code](https://fortranwiki.org/fortran/show/Modernizing+Old+Fortran). I highlight three initial hurdles below.
 
-TODO(Pranav): clean up the following examples, as several don't make sense. This entire section from here onward needs a complete rewrite.
+#### Formatting
 
-Consider a function `add` that takes two arguments: `N`, representing the size of the array, and an array `A`, which returns the sum of its elements. Please find the code snippet below.
+LAPACK was originally written in FORTRAN 77 (F77). While the library was moved to Fortran 90 in version 3.2 (2008), legacy conventions still persist in the reference implementation. One of the most visible of those conventions is formatting.
 
-FIXME: the text says two arguments, but the code snippet shows three arguments. `num` is declared but never used. It is not clear why we are using a nested loop. Without seeing the `add` implementation, this program is inscrutable.
+Developers writing F77 programs did so using a fixed form layout inherited from punched cards. This layout had strict requirements concerning the use of character columns:
 
-```fortran
-integer function add( M, N, A ) result(r)
-    ! logic to compute sum of elements
-end function
+-   Comments occupying an entire line must begin with a special character (e.g., `*`, `!`, or `C`) in the first column.
+-   For non-comment lines, 1) the first five columns must be blank or contain a numeric label, 2) column six is reserved for continuation characters, 3) executable statements must begin at column seven, and 4) any code beyond column 72 was ignored.
 
-program main
-    integer :: i, j, num, A( 4, 3 )
-    integer :: res( 4 )
-    do i = 1, 4
-        do j = 1, 3
-            ! num = compute elements to pass
-            res( i ) = add( M, N, A( i, j ) )
-        end do
-    end do
-end program
-```
-
-At first glance, it appears that the code is passing the `(i, j)th` element of `A` to `add`, making it seem incorrect. However, merely examining the code doesn't reveal whether `A(i, j:)`, `A(i:, j)`, `A(i:, j:)`, or a single array item is being referenced. In Fortran, `A(i, j)` represents a pointer to that location, allowing any of these combinations to be possible. This legacy behavior in Fortran is challenging to interpret and complicates translation to JavaScript. There’s an [active discussion](https://fortran-lang.discourse.group/t/matrix-index-pointer-confusion/8453) on Fortran-lang discourse addressing this issue. Similar legacy practices in Fortran further add to the complexity of converting code accurately to JavaScript.
-
-More specifically, let us examine two additional implementations of the add function in Fortran, where the function computes the sum of elements across a row and a column.
-
-- `add` function to compute sum of elements over a row
+Fortran 90 introduced the free form layout which removed column and line length restrictions and settled on `!` as the comment character. The following code snippet shows the reference implementation for the LAPACK routine [`dlacpy`](https://www.netlib.org/lapack/explore-html/da/dcf/dlacpy_8f_source.html):
 
 ```fortran
-integer function add( N, A ) result(r)
-  integer, intent(in) :: N
-  integer, dimension( N ), intent(in) :: A
-  integer :: i
-  r = 0
-  do i = 1, N
-      r = r + A( i )
-  end do
-end function
+      SUBROUTINE dlacpy( UPLO, M, N, A, LDA, B, LDB )
+*
+*  -- LAPACK auxiliary routine --
+*  -- LAPACK is a software package provided by Univ. of Tennessee,    --
+*  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
+*
+*     .. Scalar Arguments ..
+      CHARACTER          UPLO
+      INTEGER            LDA, LDB, M, N
+*     ..
+*     .. Array Arguments ..
+      DOUBLE PRECISION   A( LDA, * ), B( LDB, * )
+*     ..
+*
+*  =====================================================================
+*
+*     .. Local Scalars ..
+      INTEGER            I, J
+*     ..
+*     .. External Functions ..
+      LOGICAL            LSAME
+      EXTERNAL           lsame
+*     ..
+*     .. Intrinsic Functions ..
+      INTRINSIC          min
+*     ..
+*     .. Executable Statements ..
+*
+      IF( lsame( uplo, 'U' ) ) THEN
+         DO 20 j = 1, n
+            DO 10 i = 1, min( j, m )
+               b( i, j ) = a( i, j )
+   10       CONTINUE
+   20    CONTINUE
+      ELSE IF( lsame( uplo, 'L' ) ) THEN
+         DO 40 j = 1, n
+            DO 30 i = j, m
+               b( i, j ) = a( i, j )
+   30       CONTINUE
+   40    CONTINUE
+      ELSE
+         DO 60 j = 1, n
+            DO 50 i = 1, m
+               b( i, j ) = a( i, j )
+   50       CONTINUE
+   60    CONTINUE
+      END IF
+      RETURN
+*
+*     End of DLACPY
+*
+      END
 ```
 
-- `add` function to compute sum of elements over a column
-
-FIXME: this function definition is effectively indistinguishable from the previous function definition. It is just a copy-paste and replace `N` with `M`. If there is a difference, for the lay Python reader, the difference is entirely not obvious.
+The next code snippet shows the same routine, but implemented using the free form layout introduced in Fortran 90.
 
 ```fortran
-integer function add( M, A ) result(r)
-  integer, intent(in) :: M
-  integer, dimension( M ), intent(in) :: A
-  integer :: i
-  r = 0
-  do i = 1, M
-      r = r + A( i )
-  end do
-end function
+subroutine dlacpy( uplo, M, N, A, LDA, B, LDB )
+	implicit none
+	! ..
+	! Scalar arguments:
+	character :: uplo
+	integer :: LDA, LDB, M, N
+	! ..
+	! Array arguments:
+	double precision :: A( LDA, * ), B( LDB, * )
+	! ..
+	! Local scalars:
+	integer :: i, j
+	! ..
+	! External functions:
+	logical LSAME
+	external lsame
+	! ..
+	! Intrinsic functions:
+	intrinsic min
+	! ..
+	if ( lsame( uplo, 'U' ) ) then
+        do j = 1, n
+            do i = 1, min( j, m )
+               b( i, j ) = a( i, j )
+   			end do
+   		end do
+    else if( lsame( uplo, 'L' ) ) then
+        do j = 1, n
+            do i = j, m
+               b( i, j ) = a( i, j )
+   			end do
+   		end do
+    else
+        do j = 1, n
+            do i = 1, m
+               b( i, j ) = a( i, j )
+            end do
+   		end do
+    end if
+    return
+end subroutine dlacpy
 ```
 
-If we attempt to convert these functions to JavaScript while assuming a column-major order, it is crucial to ensure that the logic is accurately translated to prevent any inconsistencies.
+#### Labeled control structures
 
-<img src="/posts/implement-lapack-routines-in-stdlib/challenge-fortran.png" alt="figure showing how to iterate across column and row of a given matrix" style={{position: 'relative', left: '25%', width: '50%', height: '50%'}} />
+Another common practice in LAPACK routines is the use of labeled control structures. For example, consider the following code snippet in which the label `10` must match a corresponding `CONTINUE`.
 
-The definition of the add function will include two additional arguments: offsetA and strideA.
-
-FIXME: why does the offset come before the stride? This is not stdlib convention.
-
-```javascript
-function add( M, N, A, offsetA, strideA );
+```fortran
+      DO 10 I = 1, 10
+          PRINT *, I
+   10 CONTINUE
 ```
 
-- JS translation of program considering `add` function to compute sum of elements over a row
+Fortran 90 obviated the need for this practice, allowing one to use `end do` to end a `do` loop, as used in the free form version of `dlacpy` shown above.
 
-FIXME: this "translation" is incorrect. Again, the `add` function is shown to have 5 arguments, but you only call with 4 arguments. The matrix has 12 elements but you call `add` 12 times. `num` is declared but never used. Etc. Etc. 
+#### Assumed-size arrays
 
-```javascript
-function main() {
-  let i;
-  let j;
-  let num;
-  let A;
-  let res;
-  A = new Float64Array(4 * 3);
-  res = new Float64Array(4);
-  for (i = 0; i < 4; i++) {
-    for (j = 0; j < 3; j++) {
-      // num = compute elements to pass
-      res[i] = add(3, A, offsetA + i * 4, 3);
-    }
-  }
-}
-```
+To allow flexibility in handling arrays of varying sizes, LAPACK routines commonly operate on arrays having an assumed-shape. In the `dlacpy` routine above, the input matrix `A` is declared (`A(LDA, *)`) to be a two-dimensional array have an assumed-shape. The expression `A(LDA, *)` indicates that `A` has `LDA` number of rows and uses `*` as a placeholder indicating that the size of the second dimension is determined by the calling program.
 
-- JS translation of program considering `add` function to compute sum of elements over a column
+One consequence of using assumed-shaped arrays is that compilers are unable to perform bounds checking on the unspecified dimension. Thus, current [best practice](https://fortran-lang.discourse.group/t/matrix-index-pointer-confusion/8453/5) is to use explicit interfaces and assumed-shape arrays (e.g., `A(LDA,:)`) in order to prevent out-of-bounds memory access. However, the use of assumed-shape arrays can be problematic when needing to pass sub-matrices to other functions, as doing so requires slicing which often results in compilers creating internal copies of array data.
 
-FIXME: this "translation" is incorrect.
+#### Migrating to Fortran 95
 
-```javascript
-function main() {
-  let i;
-  let j;
-  let num;
-  let A;
-  let res;
-  A = new Float64Array(4 * 3);
-  res = new Float64Array(4);
-  for (i = 0; i < 4; i++) {
-    for (j = 0; j < 3; j++) {
-      // num = compute elements to pass
-      res[i] = add(4, A, offsetA + i * 3, 1);
-    }
-  }
-}
-```
-
-Thereby, understanding legacy Fortran code is crucial to accurately translating it to JavaScript, ensuring that the logic is correctly implemented to avoid discrepancies.
-
-TODO(Pranav): this is the end of the section which needs updating. This comment can be removed once the above content is updated.
+Needless to say, it took me a while to adjust to LAPACK conventions and adopt an LAPACK mindset. However, being something of a purist, if I was going to be porting over routines anyway, I at least wanted to bring those routines I did manage to port into a more modern age in hopes of improving code readability and future maintenance. So, after discussing things with stdlib maintainers, I settled on migrating routines to Fortran 95, which, while not the latest and greatest Fortran version, seemed to strike the right balance between maintaining the look-and-feel of the original implementations, backward compatibility, and taking advantage of newer syntactical features.
 
 ### Test Coverage
 

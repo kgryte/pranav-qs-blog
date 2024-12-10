@@ -668,48 +668,174 @@ const b3 = ( v3.data.buffer === x.data.buffer );
 // returns true
 ```
 
+Implicit in the discussion of negative strides is the need for an "offset" parameter which indicates the index of the first indexed element in linear memory. For a strided multi-dimensional array _A_ and a list of strides _s_, the index corresponding to element _A<sub>ij</sub>_ can be resolved according to the equation
+
+$$
+\textrm{idx} = \textrm{offset} + \sum_{i=0}^{N-1} i \cdot s\[i\]
+$$
+
+where _N_ is the number of array dimensions.
+
+In BLAS and LAPACK routines supporting negative strides, which is exclusively when operating on strided vectors (e.g., see `daxpy` above), the index offset is computed using logic similar to the following code snippet:
+
+```c
+if (stride < 0) {
+	offset = (1-M) * stride;
+} else {
+	offset = 0;
+}
+```
+
+where `M` is the number of vector elements. This implicitly assumes that a provided data pointer points to the beginning of linear memory for a vector. In languages supporting pointers, such as C and Fortran, in order to operate on a different region of linear memory, one typically adjusts a pointer using pointer arithmetic prior to function invocation, which is relatively cheap and straightforward, at least for the one-dimensional case. For example, returning to `c_daxpy` as defined above, we can use pointer arithmetic to limit element access to five elements within linear memory beginning at the eleventh and sixteenth (note: zero-based indexing) elements of an input and output array, respectively, as shown in the following code snippet.
+
+```c
+// Define the number of bytes per element:
+const int bytes_per_element = 8; // 8 bytes per double
+
+// ...
+
+// Define data arrays:
+const double *X = {...};
+double *Y = {...};
+
+// ...
+
+// Specify the indices of the elements which begin a desired memory region:
+const xoffset = 10;
+const yoffset = 15; 
+
+// Limit the operation to only elements within the desired memory region:
+c_daxpy(5, 5.0, X+(bytes_per_element*xoffset), 1, Y+(bytes_per_element*yoffset), 1);
+```
+
+However, in JavaScript, which does not support explicit pointer arithmetic for binary buffers, one must [explicitly instantiate](https://github.com/stdlib-js/stdlib/tree/1c56b737ec018cc818cebf19e5c7947fa684e126/lib/node_modules/%40stdlib/strided/base/offset-view) new typed array objects having a desired [byte offset](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray#parameters). In the following code snippet, in order to achieve the same results as the C example above, we must resolve a typed array constructor, compute a new byte offset, compute a new typed array length, and create a new typed array instance.
+
+```javascript
+/**
+* Returns a typed array view having the same data type as a provided input typed array and starting at a specified index offset.
+*
+* @param {TypedArray} x - input array
+* @param {integer} offset - starting index
+* @returns {TypedArray} typed array view
+*/
+function offsetView( x, offset ) {
+	return new x.constructor( x.buffer, x.byteOffset+(x.BYTES_PER_ELEMENT*offset), x.length-offset );
+}
+
+// ...
+
+const x = new Float64Array([...]);
+const y = new Float64Array([...]);
+
+// ...
+
+daxpy(5, 5.0, offsetView(x, 10), 1, offsetView(y, 15), 1);
+```
+
+While, for large array sizes, the cost of typed array instantiation is negligible compared to the time spent accessing and operating on individual array elements, for smaller array sizes, object instantiation can significantly impact performance.
+
+Accordingly, in order to avoid adverse object instantiation performance impacts, stdlib decouples an ndarray's data buffer from the location of the buffer element corresponding to the beginning of an [ndarray view](https://github.com/stdlib-js/stdlib/tree/1c56b737ec018cc818cebf19e5c7947fa684e126/lib/node_modules/%40stdlib/ndarray/base/min-view-buffer-index). This allows the slice expressions `x[2:,3:]` and `x[3:,1:]` to return new ndarray views **without** needing to instantiate new buffer instances, as demonstrated in the following code snippet.
+
+```javascript
+import linspace from '@stdlib/array-linspace'
+import FancyArray from '@stdlib/ndarray-fancy';
+
+const x = new FancyArray('float64', linspace(0, 24, 25), [5, 5], [5, 1], 0, 'row-major');
+
+const v1 = x['2:,3:'];
+const v2 = x['3:,1:'];
+
+// Assert that all arrays share the same typed array data instance:
+const b1 = ( v1.data === x.data );
+// returns true
+
+const b2 = ( v2.data === x.data );
+// returns true
+```
+
+As a consequence of decoupling a data buffer from the beginning of an ndarray view, we similarly sought to avoid having to instantiate new typed array instances when calling into LAPACK routines with ndarray data. This meant creating modified LAPACK API signatures supporting explicit offset parameters for all strided vectors and matrices. For simplicity, let's return to the JavaScript implementation of `daxpy`, which was previously defined above.
+
+```javascript
+function daxpy(N, alpha, X, strideX, Y, strideY) {
+	let ix;
+	let iy;
+	let i;
+	if (N <= 0) {
+		return;
+	}
+	if (alpha == 0.0) {
+		return;
+	}
+	if (strideX < 0) {
+		ix = (1-N) * strideX;
+	} else {
+		ix = 0;
+	}
+	if (strideY < 0) {
+		iy = (1-N) * strideY;
+	} else {
+		iy = 0;
+	}
+	for (i = 0; i < N; i++) {
+		Y[iy] += alpha * X[ix];
+		ix += strideX;
+		iy += strideY;
+	}
+	return;
+}
+```
+
+We can modify the above signature and implementation, as demonstrated in the following code snippet, in order to shift resolution of the first indexed element to the API consumer.
+
+```javascript
+function daxpy_ndarray(N, alpha, X, strideX, offsetX, Y, strideY, offsetY) {
+	let ix;
+	let iy;
+	let i;
+	if (N <= 0) {
+		return;
+	}
+	if (alpha == 0.0) {
+		return;
+	}
+	ix = offsetX;
+	iy = offsetY;
+	for (i = 0; i < N; i++) {
+		Y[iy] += alpha * X[ix];
+		ix += strideX;
+		iy += strideY;
+	}
+	return;
+}
+```
+
+For ndarrays, resolution happens during ndarray instantiation, making the invocation of `daxpy_ndarray` with ndarray data a straightforward passing of associated ndarray meta data. This is demonstrated in the following code snippet.
+
+```javascript
+import linspace from '@stdlib/array-linspace'
+import FancyArray from '@stdlib/ndarray-fancy';
+
+// Create two ndarrays:
+const x = new FancyArray('float64', linspace(0, 24, 25), [5, 5], [5, 1], 0, 'row-major');
+const y = new FancyArray('float64', linspace(0, 24, 25), [5, 5], [5, 1], 0, 'row-major');
+
+// Create a view of `x` corresponding to every other element in the 3rd row:
+const v1 = x['2,1::2'];
+
+// Create a view of `y` corresponding to every other element in the 3rd column:
+const v2 = y['1::2,2'];
+
+// Operate on the vectors:
+daxpy_ndarray(v1.length, 5.0, v1.data, v1.strides[0], v1.offset, v2.data, v2.strides[0], v2.offset);
+```
+
+
+
 TODO: scope creep and increasing ambition.
 
-Previewed in the discussion of memory layouts, need an offset parameter. LAPACK assumes that matrix data is stored in a single block of memory and only allows specifying the stride of the leading dimension of a matrix. While this allows operating on sub-matrices, it does not allow supporting matrices stored in non-contiguous memory. For non-contiguous multi-dimensional data, libraries, such as NumPy, must copy matrices to temporary buffers in order to ensure contiguous memory before calling into LAPACK. This additional data movement is not ideal, and so we sought to generalize BLIS-style APIs by including offset parameters. As JavaScript does not have an explicit concept of memory addresses and thus pointers in the manner of C, support for offset parameters allows us to avoid temporary typed array view creation by simply specifying the index of the first indexed element.
-
-TODO: shift the computation of the index of the first element to user land, rather than the implementation. For ndarrays, this is part of the ndarray meta data. Show refactor of `daxpy` without the `ix` and `iy` initial logic. Furthermore, allow generalization to arbitrary access order (LAPACK often assumes stride of second dimension is positive 1).
+Previewed in the discussion of memory layouts, need an offset parameter. LAPACK assumes that matrix data is stored in a single block of memory and only allows specifying the stride of the leading dimension of a matrix. While this allows operating on sub-matrices, it does not allow supporting matrices stored in non-contiguous memory. For non-contiguous multi-dimensional data, libraries, such as NumPy, must copy matrices to temporary buffers in order to ensure contiguous memory before calling into LAPACK. This additional data movement is not ideal, and so we sought to generalize BLIS-style APIs by including offset parameters.
 
 
-
-
-For packages that accept arrays as arguments, we developed a foundational, private version from which two distinct APIs are derived: one for the standard API and another for the ndarray API, both of which are available to end users. The final design was achieved through multiple iterations. The initial design included an `order` parameter, an array argument `A`, and `LDA`, which stands for the leading dimension of the array. Traditional BLAS APIs assume a contiguous row and column order. The `ndarray` APIs make no assumptions, as shown in figure ndarray 1(A) below, allowing users the flexibility to define views over buffers in any desired manner. Consequently, we transitioned to a new design that accepts the order, the array argument `A`, `strideA1` (the stride of the first dimension of `A`), `strideA2` (the stride of the second dimension of `A`), and a final `offsetA` parameter, which serves as an index offset for `A`. In the final iteration, the `order` parameter was removed from the base implementation, as it can be easily inferred from the two stride values.
-
-Let's now understand `ndarray` API using an example of LAPACK routine `dlacpy` that copies a matrix `A` to a matrix `B`. The function definition looks like:
-
-```javascript
-function dlacpy( M, N, A, strideA1, strideA2, offsetA, B, strideB1, strideB2, offsetB );
-```
-
-<img src="/posts/implement-lapack-routines-in-stdlib/ndarray-example.png" alt="figure showing how stdlib ndarray apis are different from conventional blas apis and an example to copy element from matrix A to matrix B" style={{position: 'relative', left: '25%', width: '50%', height: '50%'}} />
-
-Suppose you want to copy the matrix A to B using the ndarray API, as illustrated in the graphic above. This operation is not feasible with conventional LAPACK/BLAS APIs, but you can easily achieve it by running the dlacpy function with the following arguments:
-
-```javascript
-B = dlacpy(5, 4, A, 8, 2, 1, B, 10, 2, 5);
-```
-
-Not only just this, you may also support accessing elements in reverse order like:
-
-```javascript
-B = dlacpy(5, 4, A, 8, 2, 1, B, -10, -2, B.length - 6);
-```
-
-Additionally, you can also support accessing elements in reverse order, such as:
-
-```javascript
-/*
-[ 999, 999, 999, 999, 999 ]
-[  20, 999,  18, 999,  12 ]
-[ 999, 999, 999, 999, 999 ]
-[  10, 999,   4, 999,   2 ]
-[ 999, 999, 999, 999, 999 ]
-*/
-```
 
 ## Current status and next steps
 

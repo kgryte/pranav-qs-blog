@@ -921,7 +921,7 @@ SUBROUTINE dlaswp( N, A, LDA, K1, K2, IPIV, INCX )
       END
 ```
 
-To allow interfacing with the Fortran implementation from C, LAPACK provides a two-level C interface called [LAPACKE](https://netlib.org/lapack/lapacke.html), which wraps Fortran implementations and makes accommodations for both row- and column-major input matrices. The middle-level interface for `dlaswp` is shown in the following code snippet.
+To facilitate interfacing with the Fortran implementation from C, LAPACK provides a two-level C interface called [LAPACKE](https://netlib.org/lapack/lapacke.html), which wraps Fortran implementations and makes accommodations for both row- and column-major input matrices. The middle-level interface for `dlaswp` is shown in the following code snippet.
 
 ```c
 lapack_int LAPACKE_dlaswp_work( int matrix_layout, lapack_int n, double* a,
@@ -975,7 +975,7 @@ exit_level_0:
 }
 ```
 
-When called with a column-major matrix `a`, the wrapper simply passes along provided arguments to the Fortran implementation. However, when called with a row-major matrix `a`, the wrapper must allocate memory, explicitly transpose and copy `a` to a temporary matrix `a_t`, recompute the stride of the leading dimension, invoke `dlaswp` with `a_t`, transpose and copy the results stored in `a_t` to `a`, and finally free allocated memory.
+When called with a column-major matrix `a`, the wrapper `LAPACKE_dlaswp_work` simply passes along provided arguments to the Fortran implementation. However, when called with a row-major matrix `a`, the wrapper must allocate memory, explicitly transpose and copy `a` to a temporary matrix `a_t`, recompute the stride of the leading dimension, invoke `dlaswp` with `a_t`, transpose and copy the results stored in `a_t` to `a`, and finally free allocated memory. That is a fair amount of work and is common across most LAPACK routines.
 
 The following code snippet shows the reference LAPACK implementation [ported](https://github.com/stdlib-js/stdlib/blob/1c56b737ec018cc818cebf19e5c7947fa684e126/lib/node_modules/%40stdlib/lapack/base/dlaswp/lib/base.js) to JavaScript, with support for leading and trailing dimension strides, index offsets, and a strided vector containing pivot indices.
 
@@ -1105,7 +1105,7 @@ function dlaswp(order, N, A, LDA, k1, k2, IPIV, incx) {
 }
 ```
 
-I subsequently wrote a separate, but similar, [wrapper](https://github.com/stdlib-js/stdlib/blob/1c56b737ec018cc818cebf19e5c7947fa684e126/lib/node_modules/%40stdlib/lapack/base/dlaswp/lib/ndarray.js), providing an API which maps more directly to stdlib's multi-dimensional arrays and which performs some special handling when the direction in which to apply pivots is negative, as shown in the following code snippet.
+I subsequently wrote a separate but similar [wrapper](https://github.com/stdlib-js/stdlib/blob/1c56b737ec018cc818cebf19e5c7947fa684e126/lib/node_modules/%40stdlib/lapack/base/dlaswp/lib/ndarray.js), providing an API which maps more directly to stdlib's multi-dimensional arrays and which performs some special handling when the direction in which to apply pivots is negative, as shown in the following code snippet.
 
 ```javascript
 // File: ndarray.js
@@ -1135,7 +1135,9 @@ A few points to note:
 
 1. In contrast to the conventional LAPACKE API, the `matrix_layout` (order) parameter is not necessary in the `dlaswp_ndarray` and `base` APIs, as the order can be inferred from the provided strides.
 2. In contrast to the conventional LAPACKE API, when an input matrix is row-major, we don't need to copy data to temporary workspace arrays, thus reducing unnecessary memory allocation.
-3. In contrast to libraries, such as NumPy and SciPy, which interface with BLAS and LAPACK directly, when calling LAPACK routines in stdlib, we don't need to copy non-contiguous multi-dimensional data to and from temporary workspace arrays before and after invocation, respectively. Except when interfacing with hardware-optimized BLAS and LAPACK, the approach pursued during this internship helps minimize data movement and ensures performance in resource constrained browser applications. For server-side applications hoping to leverage hardware-optimized libraries, such as OpenBLAS, we provide separate wrappers which adapt generalized signature arguments to their optimized API equivalents. In this case, creating temporary copies can be worth the overhead, at least for sufficiently large arrays.
+3. In contrast to libraries, such as NumPy and SciPy, which interface with BLAS and LAPACK directly, when calling LAPACK routines in stdlib, we don't need to copy non-contiguous multi-dimensional data to and from temporary workspace arrays before and after invocation, respectively. Except when interfacing with hardware-optimized BLAS and LAPACK, the approach pursued during this internship helps minimize data movement and ensures performance in resource constrained browser applications.
+
+For server-side applications hoping to leverage hardware-optimized libraries, such as OpenBLAS, we provide separate wrappers which adapt generalized signature arguments to their optimized API equivalents. In this context, creating temporary copies can be worth the overhead, at least for sufficiently large arrays.
 
 ## Current status and next steps
 

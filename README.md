@@ -446,7 +446,7 @@ One of the problems with pursuing a bottom-up approach to adding LAPACK support 
 
 Along a similar vein to test coverage, outside of LAPACK itself, finding real-world documented examples showcasing the use of lower-level routines was challenging. While LAPACK routines are consistently preceded by a documentation comment providing descriptions of input arguments and possible return values, without code examples, visualizing and grokking expected input and output values can be challenging, especially when dealing with specialized matrices. And while neither the absence of unit tests nor documented examples is the end of the world, it meant that adding LAPACK support to stdlib would be more of a slog than I expected. Writing benchmarks, tests, examples, and documentation was simply going to require more time and effort, potentially limiting the number of routines I could implement.
 
-### Memory layout orders
+### Memory layouts
 
 When storing matrix elements in linear memory, one has two choices: either store columns contiguously or rows contiguously (see Figure 2). The former memory layout is referred to as **column-major** order and the latter as **row-major** order.
 
@@ -577,7 +577,7 @@ From the figure, we may observe that column- and row-major performance is roughl
 
 Given that it is written in Fortran, LAPACK assumes column-major access order and implements its algorithms accordingly. This presents issues for libraries, such as stdlib, which not only support row-major order, but make it their default memory layout. Were we to simply port LAPACK's Fortran implementations to JavaScript, users providing row-major matrices would experience adverse performance impacts stemming from non-sequential access.
 
-To mitigate adverse performance impacts, we borrowed an idea from [BLIS](https://github.com/flame/blis), a BLAS-like library supporting both row- and column-major memory layouts in BLAS routines, and decided to modify LAPACK implementations when porting routines from Fortran to JavaScript and C to explicitly accommodate both column- and row-major memory layouts. For some implementations, such as `dlacpy`, which is similar to the `copy` function defined above, the modifications are straightforward, often involving stride tricks and loop interchange, but, for others, they turned out to be much less straightforward due to specialized matrix handling, varying access patterns, and combinatorial parameterization.
+To mitigate adverse performance impacts, we borrowed an idea from [BLIS](https://github.com/flame/blis), a BLAS-like library supporting both row- and column-major memory layouts in BLAS routines, and decided to create modified LAPACK implementations when porting routines from Fortran to JavaScript and C that explicitly accommodate both column- and row-major memory layouts through separate stride parameters for each dimension. For some implementations, such as `dlacpy`, which is similar to the `copy` function defined above, incorporating separate independent strides is straightforward, often involving stride tricks and loop interchange, but, for others, the modifications turned out to be much less straightforward due to specialized matrix handling, varying access patterns, and combinatorial parameterization.
 
 ### ndarrays
 
@@ -833,17 +833,313 @@ const v2 = y['1::2,2'];
 daxpy_ndarray(v1.length, 5.0, v1.data, v1.strides[0], v1.offset, v2.data, v2.strides[0], v2.offset);
 ```
 
+Similar to BLIS, we saw value in both conventional LAPACK API signatures (e.g., for backward compatibility) and modified API signatures (e.g., for minimizing adverse performance impacts), and thus, we settled on a plan to provide conventional and modified APIs for each LAPACK routine. To minimize code duplication, we aimed to implement a common lower-level "base" implementation which could then be wrapped by the higher-level APIs. While the changes for the BLAS routine `daxpy` shown above may appear relatively straightforward, for LAPACK APIs, the mapping of the conventional LAPACK routine and its expected behavior to a generalized implementation was often much less so.
 
+## dlaswp
 
-TODO: scope creep and increasing ambition.
+Enough with the challenges! What did a final product look like?!
 
-Previewed in the discussion of memory layouts, need an offset parameter. LAPACK assumes that matrix data is stored in a single block of memory and only allows specifying the stride of the leading dimension of a matrix. While this allows operating on sub-matrices, it does not allow supporting matrices stored in non-contiguous memory. For non-contiguous multi-dimensional data, libraries, such as NumPy, must copy matrices to temporary buffers in order to ensure contiguous memory before calling into LAPACK. This additional data movement is not ideal, and so we sought to generalize BLIS-style APIs by including offset parameters.
+Let's come full circle and bring this back to `dlaswp`, a LAPACK routine for performing a series of row interchanges on an input matrix according to a list of pivot indices. The following code snippet shows the [Fortran implementation](https://www.netlib.org/lapack/explore-html/d7/d6b/dlaswp_8f_source.html) present in the reference LAPACK library.
 
+```fortran
+SUBROUTINE dlaswp( N, A, LDA, K1, K2, IPIV, INCX )
+*
+*  -- LAPACK auxiliary routine --
+*  -- LAPACK is a software package provided by Univ. of Tennessee,    --
+*  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
+*
+*     .. Scalar Arguments ..
+      INTEGER            INCX, K1, K2, LDA, N
+*     ..
+*     .. Array Arguments ..
+      INTEGER            IPIV( * )
+      DOUBLE PRECISION   A( LDA, * )
+*     ..
+*
+* =====================================================================
+*
+*     .. Local Scalars ..
+      INTEGER            I, I1, I2, INC, IP, IX, IX0, J, K, N32
+      DOUBLE PRECISION   TEMP
+*     ..
+*     .. Executable Statements ..
+*
+*     Interchange row I with row IPIV(K1+(I-K1)*abs(INCX)) for each of rows
+*     K1 through K2.
+*
+      IF( incx.GT.0 ) THEN
+         ix0 = k1
+         i1 = k1
+         i2 = k2
+         inc = 1
+      ELSE IF( incx.LT.0 ) THEN
+         ix0 = k1 + ( k1-k2 )*incx
+         i1 = k2
+         i2 = k1
+         inc = -1
+      ELSE
+         RETURN
+      END IF
+*
+      n32 = ( n / 32 )*32
+      IF( n32.NE.0 ) THEN
+         DO 30 j = 1, n32, 32
+            ix = ix0
+            DO 20 i = i1, i2, inc
+               ip = ipiv( ix )
+               IF( ip.NE.i ) THEN
+                  DO 10 k = j, j + 31
+                     temp = a( i, k )
+                     a( i, k ) = a( ip, k )
+                     a( ip, k ) = temp
+   10             CONTINUE
+               END IF
+               ix = ix + incx
+   20       CONTINUE
+   30    CONTINUE
+      END IF
+      IF( n32.NE.n ) THEN
+         n32 = n32 + 1
+         ix = ix0
+         DO 50 i = i1, i2, inc
+            ip = ipiv( ix )
+            IF( ip.NE.i ) THEN
+               DO 40 k = n32, n
+                  temp = a( i, k )
+                  a( i, k ) = a( ip, k )
+                  a( ip, k ) = temp
+   40          CONTINUE
+            END IF
+            ix = ix + incx
+   50    CONTINUE
+      END IF
+*
+      RETURN
+*
+*     End of DLASWP
+*
+      END
+```
 
+To allow interfacing with the Fortran implementation from C, LAPACK provides a two-level C interface called [LAPACKE](https://netlib.org/lapack/lapacke.html), which wraps Fortran implementations and makes accommodations for both row- and column-major input matrices. The middle-level interface for `dlaswp` is shown in the following code snippet.
+
+```c
+lapack_int LAPACKE_dlaswp_work( int matrix_layout, lapack_int n, double* a,
+                                lapack_int lda, lapack_int k1, lapack_int k2,
+                                const lapack_int* ipiv, lapack_int incx )
+{
+    lapack_int info = 0;
+    if( matrix_layout == LAPACK_COL_MAJOR ) {
+        /* Call LAPACK function and adjust info */
+        LAPACK_dlaswp( &n, a, &lda, &k1, &k2, ipiv, &incx );
+        if( info < 0 ) {
+            info = info - 1;
+        }
+    } else if( matrix_layout == LAPACK_ROW_MAJOR ) {
+        lapack_int lda_t = MAX(1,k2);
+        lapack_int i;
+        for( i = k1; i <= k2; i++ ) {
+            lda_t = MAX( lda_t, ipiv[k1 + ( i - k1 ) * ABS( incx ) - 1] );
+        }
+        double* a_t = NULL;
+        /* Check leading dimension(s) */
+        if( lda < n ) {
+            info = -4;
+            LAPACKE_xerbla( "LAPACKE_dlaswp_work", info );
+            return info;
+        }
+        /* Allocate memory for temporary array(s) */
+        a_t = (double*)LAPACKE_malloc( sizeof(double) * lda_t * MAX(1,n) );
+        if( a_t == NULL ) {
+            info = LAPACK_TRANSPOSE_MEMORY_ERROR;
+            goto exit_level_0;
+        }
+        /* Transpose input matrices */
+        LAPACKE_dge_trans( matrix_layout, lda_t, n, a, lda, a_t, lda_t );
+        /* Call LAPACK function and adjust info */
+        LAPACK_dlaswp( &n, a_t, &lda_t, &k1, &k2, ipiv, &incx );
+        info = 0;  /* LAPACK call is ok! */
+        /* Transpose output matrices */
+        LAPACKE_dge_trans( LAPACK_COL_MAJOR, lda_t, n, a_t, lda_t, a, lda );
+        /* Release memory and exit */
+        LAPACKE_free( a_t );
+exit_level_0:
+        if( info == LAPACK_TRANSPOSE_MEMORY_ERROR ) {
+            LAPACKE_xerbla( "LAPACKE_dlaswp_work", info );
+        }
+    } else {
+        info = -1;
+        LAPACKE_xerbla( "LAPACKE_dlaswp_work", info );
+    }
+    return info;
+}
+```
+
+When called with a column-major matrix `a`, the wrapper simply passes along provided arguments to the Fortran implementation. However, when called with a row-major matrix `a`, the wrapper must allocate memory, explicitly transpose and copy `a` to a temporary matrix `a_t`, recompute the stride of the leading dimension, invoke `dlaswp` with `a_t`, transpose and copy the results stored in `a_t` to `a`, and finally free allocated memory.
+
+The following code snippet shows the reference LAPACK implementation [ported](https://github.com/stdlib-js/stdlib/blob/1c56b737ec018cc818cebf19e5c7947fa684e126/lib/node_modules/%40stdlib/lapack/base/dlaswp/lib/base.js) to JavaScript, with support for leading and trailing dimension strides, index offsets, and a strided vector containing pivot indices.
+
+```javascript
+// File: base.js
+
+// ...
+
+const BLOCK_SIZE = 32;
+
+// ...
+
+function base(N, A, strideA1, strideA2, offsetA, k1, k2, inck, IPIV, strideIPIV, offsetIPIV) {
+	let nrows;
+	let n32;
+	let tmp;
+	let row;
+	let ia1;
+	let ia2;
+	let ip;
+	let o;
+
+	// Compute the number of rows to be interchanged:
+	if (inck > 0) {
+		nrows = k2 - k1;
+	} else {
+		nrows = k1 - k2;
+	}
+	nrows += 1;
+
+	// If the order is row-major, we can delegate to the Level 1 routine `dswap` for interchanging rows...
+	if (isRowMajor([strideA1, strideA2])) {
+		ip = offsetIPIV;
+		for (let i = 0, k = k1; i < nrows; i++, k += inck) {
+			row = IPIV[ip];
+			if (row !== k) {
+				dswap(N, A, strideA2, offsetA+(k*strideA1), A, strideA2, offsetA+(row*strideA1));
+			}
+			ip += strideIPIV;
+		}
+		return A;
+	}
+	// If the order is column-major, we need to use loop tiling to ensure efficient cache access when accessing matrix elements...
+	n32 = floor(N/BLOCK_SIZE) * BLOCK_SIZE;
+	if (n32 !== 0) {
+		for (let j = 0; j < n32; j += BLOCK_SIZE) {
+			ip = offsetIPIV;
+			for (let i = 0, k = k1; i < nrows; i++, k += inck) {
+				row = IPIV[ip];
+				if (row !== k) {
+					ia1 = offsetA + (k*strideA1);
+					ia2 = offsetA + (row*strideA1);
+					for (let n = j; n < j+BLOCK_SIZE; n++) {
+						o = n * strideA2;
+						tmp = A[ia1+o];
+						A[ia1+o] = A[ia2+o];
+						A[ia2+o] = tmp;
+					}
+				}
+				ip += strideIPIV;
+			}
+		}
+	}
+	if (n32 !== N) {
+		ip = offsetIPIV;
+		for (let i = 0, k = k1; i < nrows; i++, k += inck) {
+			row = IPIV[ ip ];
+			if (row !== k) {
+				ia1 = offsetA + (k*strideA1);
+				ia2 = offsetA + (row*strideA1);
+				for (let n = n32; n < N; n++) {
+					o = n * strideA2;
+					tmp = A[ia1+o];
+					A[ia1+o] = A[ia2+o];
+					A[ia2+o] = tmp;
+				}
+			}
+			ip += strideIPIV;
+		}
+	}
+	return A;
+}
+```
+
+To provide an API having consistent behavior with conventional LAPACK, I then wrapped the above implementation and adapted input arguments to the "base" implementation, as shown in the following code snippet.
+
+```javascript
+// File: dlaswp.js
+
+// ...
+const base = require( './base.js' );
+
+// ...
+
+function dlaswp(order, N, A, LDA, k1, k2, IPIV, incx) {
+	let tmp;
+	let inc;
+	let sa1;
+	let sa2;
+	let io;
+	if (!isLayout(order)) {
+		throw new TypeError(format('invalid argument. First argument must be a valid order. Value: `%s`.', order));
+	}
+	if (order === 'row-major' && LDA < max(1, N)) {
+		throw new RangeError(format('invalid argument. Fourth argument must be greater than or equal to max(1,%d). Value: `%d`.', N, LDA));
+	}
+	if (incx > 0) {
+		inc = 1;
+		io = k1;
+	} else if (incx < 0) {
+		inc = -1;
+		io = k1 + ((k1-k2) * incx);
+		tmp = k1;
+		k1 = k2;
+		k2 = tmp;
+	} else {
+		return A;
+	}
+	if (order === 'column-major') {
+		sa1 = 1;
+		sa2 = LDA;
+	} else { // order === 'row-major'
+		sa1 = LDA;
+		sa2 = 1;
+	}
+	return base(N, A, sa1, sa2, 0, k1, k2, inc, IPIV, incx, io);
+}
+```
+
+I subsequently wrote a separate, but similar, [wrapper](https://github.com/stdlib-js/stdlib/blob/1c56b737ec018cc818cebf19e5c7947fa684e126/lib/node_modules/%40stdlib/lapack/base/dlaswp/lib/ndarray.js), providing an API which maps more directly to stdlib's multi-dimensional arrays and which performs some special handling when the direction in which to apply pivots is negative, as shown in the following code snippet.
+
+```javascript
+// File: ndarray.js
+
+const base = require( './base.js' );
+
+// ...
+
+function dlaswp_ndarray( N, A, strideA1, strideA2, offsetA, k1, k2, inck, IPIV, strideIPIV, offsetIPIV ) {
+	let tmp;
+	if (inck < 0) {
+		offsetIPIV += k2 * strideIPIV;
+		strideIPIV *= -1;
+		tmp = k1;
+		k1 = k2;
+		k2 = tmp;
+		inck = -1;
+	} else {
+		offsetIPIV += k1 * strideIPIV;
+		inck = 1;
+	}
+	return base(N, A, strideA1, strideA2, offsetA, k1, k2, inck, IPIV, strideIPIV, offsetIPIV);
+}
+```
+
+A few points to note:
+
+1. In contrast to the conventional LAPACKE API, the `matrix_layout` (order) parameter is not necessary in the `dlaswp_ndarray` and `base` APIs, as the order can be inferred from the provided strides.
+2. In contrast to the conventional LAPACKE API, when an input matrix is row-major, we don't need to copy data to temporary workspace arrays, thus reducing unnecessary memory allocation.
+3. In contrast to libraries, such as NumPy and SciPy, which interface with BLAS and LAPACK directly, when calling LAPACK routines in stdlib, we don't need to copy non-contiguous multi-dimensional data to and from temporary workspace arrays before and after invocation, respectively. Except when interfacing with hardware-optimized BLAS and LAPACK, the approach pursued during this internship helps minimize data movement and ensures performance in resource constrained browser applications. For server-side applications hoping to leverage hardware-optimized libraries, such as OpenBLAS, we provide separate wrappers which adapt generalized signature arguments to their optimized API equivalents. In this case, creating temporary copies can be worth the overhead, at least for sufficiently large arrays.
 
 ## Current status and next steps
 
-Despite the challenges, unforeseen setbacks, and multiple design iterations, I am happy to report that I was able to open [36 PRs](https://github.com/stdlib-js/stdlib/pulls?q=sort%3Aupdated-desc+is%3Apr+author%3APranavchiku+label%3ALAPACK+) adding support for various LAPACK routines and associated utilities, and I co-authored a blog post with [Athan Reines](https://github.com/kgryte) on ["How to Call Fortran Routines from JavaScript Using Node.js"](https://blog.stdlib.io/how-to-call-fortran-routines-from-javascript-with-node-js/). Obviously not quite 1,700 routines, but a good start! :)
+Despite the challenges, unforeseen setbacks, and multiple design iterations, I am happy to report that, in addition to `dlaswp` above, I was able to open [35 PRs](https://github.com/stdlib-js/stdlib/pulls?q=sort%3Aupdated-desc+is%3Apr+author%3APranavchiku+label%3ALAPACK+) adding support for various LAPACK routines and associated utilities, and I co-authored a blog post with [Athan Reines](https://github.com/kgryte) on ["How to Call Fortran Routines from JavaScript Using Node.js"](https://blog.stdlib.io/how-to-call-fortran-routines-from-javascript-with-node-js/). Obviously not quite 1,700 routines, but a good start! :)
 
 Nevertheless, the future is bright, and we are quite excited about this work. There's still plenty of room for improvement and additional research and development. In particular, we're keen to
 

@@ -108,7 +108,7 @@ void c_daxpy(const int N, const double alpha, const double *X, const int strideX
 }
 ````
 
-After compilation to WebAssembly and loading the WebAssembly binary into our web application, we need perform a series of steps before we can call the `c_daxpy` routine from JavaScript. First, we need to instantiate a new WebAssembly module.
+After compilation to WebAssembly and loading the WebAssembly binary into our web application, we need to perform a series of steps before we can call the `c_daxpy` routine from JavaScript. First, we need to instantiate a new WebAssembly module.
 
 ```javascript
 const binary = new UintArray([...]);
@@ -195,7 +195,7 @@ function daxpy(N, alpha, X, strideX, Y, strideY) {
 	if (N <= 0) {
 		return;
 	}
-	if (alpha == 0.0) {
+	if (alpha === 0.0) {
 		return;
 	}
 	if (strideX < 0) {
@@ -250,7 +250,7 @@ Now that I've prosecuted the case against just compiling the entirety of LAPACK 
 
 To embrace radical modularity is to recognize that what is best is highly contextual, and, depending on the needs and constraints of user applications, developers need the flexibility to pick the right abstraction. If a developer is writing a Node.js application, that may mean binding to hardware-optimized libraries, such as OpenBLAS, Intel MKL, or Apple Accelerate in order to achieve superior performance. If a developer is deploying a web application needing a small set of numerical routines, JavaScript is likely the right tool for the job. And if a developer is working on a large, resource intensive WebAssembly application (e.g., for image editing or a gaming engine), then being able to easily compile individual routines as part of the larger application will be paramount. In short, we want a radically modular LAPACK.
 
-My mission during the Quansight internship was to lay the groundwork for such an endeavor, to work out the kinks and find the gaps, and to hopefully get us a few steps closer to high-performance linear algebra on the web. But what does radically modularity look like? It all begins with the fundamental unit of functionality, the **package**.
+My mission during the Quansight internship was to lay the groundwork for such an endeavor, to work out the kinks and find the gaps, and to hopefully get us a few steps closer to high-performance linear algebra on the web. But what does radical modularity look like? It all begins with the fundamental unit of functionality, the **package**.
 
 Every package in stdlib is its own standalone thing, containing co-localized tests, benchmarks, examples, documentation, build files, and associated meta data (including the enumeration of any dependencies) and defining a clear API surface with the outside world. In order to add LAPACK support to stdlib, that means creating a separate standalone package for each LAPACK routine with the following structure:
 
@@ -760,7 +760,7 @@ function daxpy(N, alpha, X, strideX, Y, strideY) {
 	if (N <= 0) {
 		return;
 	}
-	if (alpha == 0.0) {
+	if (alpha === 0.0) {
 		return;
 	}
 	if (strideX < 0) {

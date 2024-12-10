@@ -839,7 +839,7 @@ Similar to BLIS, we saw value in both conventional LAPACK API signatures (e.g., 
 
 Enough with the challenges! What did a final product look like?!
 
-Let's come full circle and bring this back to `dlaswp`, a LAPACK routine for performing a series of row interchanges on an input matrix according to a list of pivot indices. The following code snippet shows the [Fortran implementation](https://www.netlib.org/lapack/explore-html/d7/d6b/dlaswp_8f_source.html) present in the reference LAPACK library.
+Let's come full circle and bring this back to `dlaswp`, a LAPACK routine for performing a series of row interchanges on an input matrix according to a list of pivot indices. The following code snippet shows the reference LAPACK [Fortran implementation](https://www.netlib.org/lapack/explore-html/d7/d6b/dlaswp_8f_source.html).
 
 ```fortran
 SUBROUTINE dlaswp( N, A, LDA, K1, K2, IPIV, INCX )
@@ -921,7 +921,7 @@ SUBROUTINE dlaswp( N, A, LDA, K1, K2, IPIV, INCX )
       END
 ```
 
-To facilitate interfacing with the Fortran implementation from C, LAPACK provides a two-level C interface called [LAPACKE](https://netlib.org/lapack/lapacke.html), which wraps Fortran implementations and makes accommodations for both row- and column-major input matrices. The middle-level interface for `dlaswp` is shown in the following code snippet.
+To facilitate interfacing with the Fortran implementation from C, LAPACK provides a two-level C interface called [LAPACKE](https://netlib.org/lapack/lapacke.html), which wraps Fortran implementations and makes accommodations for both row- and column-major input and output matrices. The middle-level interface for `dlaswp` is shown in the following code snippet.
 
 ```c
 lapack_int LAPACKE_dlaswp_work( int matrix_layout, lapack_int n, double* a,
@@ -1105,7 +1105,7 @@ function dlaswp(order, N, A, LDA, k1, k2, IPIV, incx) {
 }
 ```
 
-I subsequently wrote a separate but similar [wrapper](https://github.com/stdlib-js/stdlib/blob/1c56b737ec018cc818cebf19e5c7947fa684e126/lib/node_modules/%40stdlib/lapack/base/dlaswp/lib/ndarray.js), providing an API which maps more directly to stdlib's multi-dimensional arrays and which performs some special handling when the direction in which to apply pivots is negative, as shown in the following code snippet.
+I subsequently wrote a separate but similar [wrapper](https://github.com/stdlib-js/stdlib/blob/1c56b737ec018cc818cebf19e5c7947fa684e126/lib/node_modules/%40stdlib/lapack/base/dlaswp/lib/ndarray.js) which provides an API mapping more directly to stdlib's multi-dimensional arrays and which performs some special handling when the direction in which to apply pivots is negative, as shown in the following code snippet.
 
 ```javascript
 // File: ndarray.js

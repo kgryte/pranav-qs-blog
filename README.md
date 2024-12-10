@@ -792,7 +792,7 @@ function daxpy_ndarray(N, alpha, X, strideX, offsetX, Y, strideY, offsetY) {
 	if (N <= 0) {
 		return;
 	}
-	if (alpha == 0.0) {
+	if (alpha === 0.0) {
 		return;
 	}
 	ix = offsetX;

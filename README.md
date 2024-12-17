@@ -638,10 +638,10 @@ const v2 = x['::2,::2'];
 // returns <FancyArray>
 
 // Assert that all arrays share the same underlying memory buffer:
-const b1 = ( v1.data.buffer === x.data.buffer );
+const b1 = (v1.data.buffer === x.data.buffer);
 // returns true
 
-const b2 = ( v2.data.buffer === x.data.buffer );
+const b2 = (v2.data.buffer === x.data.buffer);
 // returns true
 ```
 
@@ -677,13 +677,13 @@ const v2 = x[':,::-1'];
 const v3 = x['::-1,::-1'];
 
 // Assert that all arrays share the same underlying memory buffer:
-const b1 = ( v1.data.buffer === x.data.buffer );
+const b1 = (v1.data.buffer === x.data.buffer);
 // returns true
 
-const b2 = ( v2.data.buffer === x.data.buffer );
+const b2 = (v2.data.buffer === x.data.buffer);
 // returns true
 
-const b3 = ( v3.data.buffer === x.data.buffer );
+const b3 = (v3.data.buffer === x.data.buffer);
 // returns true
 ```
 
@@ -726,14 +726,15 @@ However, in JavaScript, which does not support explicit pointer arithmetic for b
 
 ```javascript
 /**
-* Returns a typed array view having the same data type as a provided input typed array and starting at a specified index offset.
+* Returns a typed array view having the same data type as a provided input typed
+* array and starting at a specified index offset.
 *
 * @param {TypedArray} x - input array
 * @param {integer} offset - starting index
 * @returns {TypedArray} typed array view
 */
-function offsetView( x, offset ) {
-    return new x.constructor( x.buffer, x.byteOffset+(x.BYTES_PER_ELEMENT*offset), x.length-offset );
+function offsetView(x, offset) {
+    return new x.constructor(x.buffer, x.byteOffset+(x.BYTES_PER_ELEMENT*offset), x.length-offset);
 }
 
 // ...
@@ -760,10 +761,10 @@ const v1 = x['2:,3:'];
 const v2 = x['3:,1:'];
 
 // Assert that all arrays share the same typed array data instance:
-const b1 = ( v1.data === x.data );
+const b1 = (v1.data === x.data);
 // returns true
 
-const b2 = ( v2.data === x.data );
+const b2 = (v2.data === x.data);
 // returns true
 ```
 
